@@ -13,7 +13,7 @@ I mapped Airlock Digital's enforcement model against every Windows-applicable te
 This post walks through the methodology, the results, and what it actually means for defenders building layered security architectures.
 
 <!-- Replace the path below with your actual Navigator screenshot -->
-![ATT&CK Navigator Heatmap](airlock_mitre_coverage.svg)
+![ATT&CK Navigator Heatmap](airlock_mitre_coverage.png)
 
 *Green = Covered by Airlock | White = Not Covered (outside execution control scope)*
 
