@@ -843,7 +843,7 @@ Security Support Provider DLL. Loaded by lsass. Must be trusted.
 ### T1547.008 - LSASS Driver
 **Yes** 🟢 | default-deny + blocklist (predefined) | Testable: yes
 
-LSASS driver must be trusted to load. Airlock kernel driver intercepts driver loads. Microsoft Recommended Driver Block Rules predefined blocklist available for known malicious drivers.
+Attackers register a malicious driver or DLL to be loaded by the LSASS process at boot (e.g., SSP, authentication package). LSASS itself is not blocked - it's a critical Windows process. The untrusted driver/DLL that LSASS tries to load IS blocked by DLL control. Microsoft Recommended Driver Block Rules predefined blocklist covers known malicious drivers even if signed.
 
 **Test:** 1) Untrusted driver -> blocked at load. 2) Import MS Driver Block Rules -> known bad drivers blocked even if signed.
 
