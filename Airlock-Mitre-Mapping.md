@@ -1,5 +1,9 @@
 # Airlock Digital - MITRE ATT&CK Enterprise Mapping (Windows)
 
+>**Author:** Rob Shiplo - Sr Research Engineer - Systems & Endpoint Security @ Airlock Digital
+>
+>**Published:** March 2026 | **Platform:** Windows | **ATT&CK Version:** Enterprise v18.1
+
 ## Overview
 
 **Total techniques:** 472
