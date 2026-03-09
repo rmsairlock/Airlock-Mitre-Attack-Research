@@ -8,11 +8,11 @@
 
 ## TL;DR
 
-I mapped Airlock Digital's enforcement model against every Windows-applicable technique in the MITRE ATT&CK Enterprise framework - 472 techniques and sub-techniques, scored with a binary Yes/No model. No hedging, no inflated numbers. The result: Airlock directly controls an execution point in **214 techniques (45%)**. The remaining 258 are genuinely outside the scope of execution control - network protocols, identity operations, in-memory manipulation - and this post explains what covers each of those instead.
+I mapped Airlock Digital's enforcement model against every Windows-applicable technique in the MITRE ATT&CK Enterprise framework - 472 techniques and sub-techniques, scored with a binary Yes/No model. No hedging, no inflated numbers. The result: Airlock directly controls an execution point in **209 techniques (44%)**. The remaining 263 are genuinely outside the scope of execution control - network protocols, identity operations, in-memory manipulation - and this post explains what covers each of those instead.
 
 This post walks through the methodology, the results, and what it actually means for defenders building layered security architectures.
 
-![ATT&CK Navigator Heatmap](airlock_mitre_coverage.png)
+![ATT&CK Coverage by Tactic](images/airlock_mitre_coverage.png)
 
 ---
 
@@ -68,23 +68,23 @@ A technique is also scored "Yes" if a specific identifiable binary can be restri
 
 | | Count | Percentage |
 |:---|---:|---:|
-| **Covered (Yes)** | 214 | 45% |
-| **Not Covered (No)** | 258 | 55% |
+| **Covered (Yes)** | 209 | 44% |
+| **Not Covered (No)** | 263 | 56% |
 | **Total** | 472 | 100% |
 
 ### Coverage by Tactic
 
 | Tactic | Yes | No | Total | Coverage |
 |:-------|----:|---:|------:|---------:|
-| Execution | 24 | 3 | 27 | 89% |
+| Execution | 23 | 4 | 27 | 85% |
 | Persistence | 67 | 24 | 91 | 74% |
-| Privilege Escalation | 48 | 27 | 75 | 64% |
-| Lateral Movement | 12 | 5 | 17 | 71% |
+| Privilege Escalation | 47 | 28 | 75 | 63% |
+| Lateral Movement | 10 | 7 | 17 | 59% |
 | Defense Evasion | 77 | 88 | 165 | 47% |
 | Discovery | 21 | 21 | 42 | 50% |
 | Impact | 9 | 21 | 30 | 30% |
 | Initial Access | 6 | 15 | 21 | 29% |
-| Credential Access | 14 | 39 | 53 | 26% |
+| Credential Access | 13 | 40 | 53 | 25% |
 | Command and Control | 6 | 39 | 45 | 13% |
 | Collection | 4 | 28 | 32 | 13% |
 | Exfiltration | 0 | 17 | 17 | 0% |
@@ -110,7 +110,7 @@ This is the largest tactic at 165 techniques, and it's where Airlock's strengths
 - **LOLBIN proxy execution:** MSBuild, mshta, InstallUtil, regsvr32, rundll32, CMSTP, odbcconf - all controllable via predefined blocklist packages mapped to the LOLBAS project and MITRE ATT&CK techniques. DLLs loaded by these proxies must be trusted.
 - **DLL hijacking:** Search order hijacking, sideloading, COR_PROFILER injection - the untrusted DLL is blocked at load regardless of how it got there.
 
-The 88 "No" techniques in defense evasion are predominantly in-memory operations (process injection family, reflective code loading), identity-level techniques (valid accounts, token manipulation), and pre-OS boot (firmware, bootkit).
+The 87 "No" techniques in defense evasion are predominantly in-memory operations (process injection family), identity-level techniques (valid accounts, token manipulation), and pre-OS boot (firmware, bootkit).
 
 ### Lateral Movement (71% covered)
 

