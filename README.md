@@ -8,7 +8,7 @@
 
 ## TL;DR
 
-I mapped Airlock Digital's enforcement model against every Windows-applicable technique in the MITRE ATT&CK Enterprise framework - 472 techniques and sub-techniques, scored with a binary Yes/No model. No hedging, no inflated numbers. The result: Airlock directly controls an execution point in **199 techniques (42%)** overall.
+I mapped Airlock Digital's enforcement model against every Windows-applicable technique in the MITRE ATT&CK Enterprise framework - 472 techniques and sub-techniques, scored with a binary Yes/No model. No hedging, no inflated numbers. The result: Airlock directly controls an execution point in **199 techniques (42%)** overall, which in my opinion is AMAZING for ONE part of a defense in depth strategy.
 
 But not all ATT&CK tactics are execution control problems. When scoped to the tactics where execution control is actually the right tool for the job - Execution, Persistence, Privilege Escalation, Defense Evasion, Lateral Movement, and Impact - Airlock covers **55% (226 of 405 techniques)**. The remaining uncovered tactics are predominantly network-level (C2, Exfiltration) and identity-plane operations (Credential Access, Collection) that no allowlisting product would address.
 
