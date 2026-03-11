@@ -8,11 +8,13 @@
 
 ## TL;DR
 
-I mapped Airlock Digital's enforcement model against every Windows-applicable technique in the MITRE ATT&CK Enterprise framework - 472 techniques and sub-techniques, scored with a binary Yes/No model. No hedging, no inflated numbers. The result: Airlock directly controls an execution point in **209 techniques (44%)**. The remaining 263 are genuinely outside the scope of execution control - network protocols, identity operations, in-memory manipulation - and this post explains what covers each of those instead.
+I mapped Airlock Digital's enforcement model against every Windows-applicable technique in the MITRE ATT&CK Enterprise framework - 472 techniques and sub-techniques, scored with a binary Yes/No model. No hedging, no inflated numbers. The result: Airlock directly controls an execution point in **199 techniques (42%)** overall.
 
-This post walks through the methodology, the results, and what it actually means for defenders building layered security architectures.
+But not all ATT&CK tactics are execution control problems. When scoped to the tactics where execution control is actually the right tool for the job - Execution, Persistence, Privilege Escalation, Defense Evasion, Lateral Movement, and Impact - Airlock covers **55% (226 of 405 techniques)**. The remaining uncovered tactics are predominantly network-level (C2, Exfiltration) and identity-plane operations (Credential Access, Collection) that no allowlisting product would address.
 
 ![ATT&CK Coverage by Tactic](airlock_mitre_coverage.png)
+
+This post walks through the methodology, the results, and what it actually means for defenders building layered security architectures.
 
 ---
 
@@ -54,11 +56,13 @@ A technique is scored "Yes" if Airlock blocks execution at any point in the tech
 - **Registry Run Keys (T1547.001):** The attacker can write the registry key. At next logon, the untrusted binary it points to is blocked. Yes.
 - **Service Execution (T1569.002):** PsExec copies its service binary to the remote host. The binary is blocked on the target. Yes.
 
-A technique is also scored "Yes" if a specific identifiable binary can be restricted via Airlock's blocklist metarule engine - even if that binary is a trusted, Microsoft-signed OS utility. The blocklist takes precedence over the allowlist, and the metarule engine supports conditional criteria including original filename, user/group membership, and logical AND/OR combinations. For example:
+A technique is also scored "Yes" if a specific identifiable binary can be **safely** restricted via Airlock's blocklist metarule engine - meaning the tool can be blocklisted for non-admin users without breaking standard Windows operations. For example:
 
-- **Clear Windows Event Logs (T1070.001):** `wevtutil.exe` is a trusted OS binary. Blocklist metarule: original filename "wevtutil" AND user NOT member of Administrators → blocked for non-admins. Yes.
-- **Inhibit System Recovery (T1490):** `vssadmin.exe` and `bcdedit.exe` - critical ransomware precursor tools - can be blocklisted for non-admin users. Yes.
-- **OS Credential Dumping (T1003):** Standalone tools like mimikatz are blocked by default-deny. Built-in tools like `procdump.exe` and `rundll32.exe` (for comsvcs.dll MiniDump) can be blocklisted via metarule for non-admins. Yes.
+- **Clear Windows Event Logs (T1070.001):** `wevtutil.exe` is a trusted OS binary that standard users never need. Blocklist metarule: original filename "wevtutil" AND user NOT member of Administrators. Yes.
+- **Inhibit System Recovery (T1490):** `vssadmin.exe` and `bcdedit.exe` - critical ransomware precursor tools that standard users never need - can be safely blocklisted for non-admin users. Yes.
+- **OS Credential Dumping (T1003):** Standalone tools like mimikatz are blocked by default-deny. Built-in tools like `procdump.exe` can be blocklisted by original filename.
+
+Conversely, a technique is scored "No" if the only path to coverage would require blocklisting a core Windows utility that standard users depend on (like `net.exe` for drive mapping, or `reg.exe` used by installers and Group Policy processing).
 
 ---
 
@@ -68,8 +72,8 @@ A technique is also scored "Yes" if a specific identifiable binary can be restri
 
 | | Count | Percentage |
 |:---|---:|---:|
-| **Covered (Yes)** | 209 | 44% |
-| **Not Covered (No)** | 263 | 56% |
+| **Covered (Yes)** | 199 | 42% |
+| **Not Covered (No)** | 273 | 58% |
 | **Total** | 472 | 100% |
 
 ### Coverage by Tactic
@@ -77,42 +81,42 @@ A technique is also scored "Yes" if a specific identifiable binary can be restri
 | Tactic | Yes | No | Total | Coverage |
 |:-------|----:|---:|------:|---------:|
 | Execution | 23 | 4 | 27 | 85% |
-| Persistence | 67 | 24 | 91 | 74% |
-| Privilege Escalation | 47 | 28 | 75 | 63% |
-| Lateral Movement | 10 | 7 | 17 | 59% |
-| Defense Evasion | 77 | 88 | 165 | 47% |
-| Discovery | 21 | 21 | 42 | 50% |
+| Persistence | 63 | 28 | 91 | 69% |
+| Privilege Escalation | 46 | 29 | 75 | 61% |
+| Lateral Movement | 10 | 7 | 17 | 58% |
+| Defense Evasion | 75 | 90 | 165 | 45% |
+| Discovery | 16 | 26 | 42 | 38% |
 | Impact | 9 | 21 | 30 | 30% |
-| Initial Access | 6 | 15 | 21 | 29% |
-| Credential Access | 13 | 40 | 53 | 25% |
+| Initial Access | 6 | 15 | 21 | 28% |
+| Credential Access | 13 | 40 | 53 | 24% |
 | Command and Control | 6 | 39 | 45 | 13% |
-| Collection | 4 | 28 | 32 | 13% |
+| Collection | 4 | 28 | 32 | 12% |
 | Exfiltration | 0 | 17 | 17 | 0% |
 
 ---
 
 ## Where Airlock Is Strongest
 
-### Execution (89% covered)
+### Execution (85% covered)
 
-This is Airlock's home turf. Script control covers all major scripting interpreters - PowerShell, cmd/batch, VBScript, JavaScript, Python, AutoIT, Lua - with SHA-256 hashing at execution time. DLL control catches malicious libraries at load time. The only execution techniques Airlock doesn't cover are Native API calls inside already-running processes (T1106), IPC between trusted processes (T1559), and input injection (T1674) - all of which operate within trusted process context where no new file execution occurs.
+This is Airlock's home turf. Script control covers all major scripting interpreters - PowerShell, cmd/batch, VBScript, JavaScript, Python, AutoIT, Lua - with SHA-256 hashing at execution time. DLL control catches malicious libraries at load time. The only execution techniques Airlock doesn't cover are Native API calls inside already-running processes (T1106), IPC between trusted processes (T1559), input injection (T1674), and exploitation for client execution (T1203) - all of which operate within trusted process context where no new file execution occurs, or involve exploiting a vulnerability rather than executing a file.
 
-### Persistence (74% covered)
+### Persistence (69% covered)
 
 Attackers establish persistence by registering something to execute later - a registry key pointing to a binary, a service configured to load a DLL, a scheduled task with a payload. Airlock doesn't prevent the registration, but it blocks the payload when it fires. Every DLL-loading persistence mechanism (Winlogon helpers, AppInit DLLs, AppCert DLLs, LSA extensions, port monitors, print processors, COM hijacking, netsh helpers) is directly controlled by DLL allowlisting.
 
-### Defense Evasion (47% covered)
+### Defense Evasion (45% covered)
 
 This is the largest tactic at 165 techniques, and it's where Airlock's strengths are most distinct from traditional security tools. Default-deny is inherently resistant to evasion techniques that defeat signature-based detection:
 
 - **Obfuscation, packing, polymorphism:** Every variant has a unique hash that isn't in the allowlist. Blocked every time. This is a fundamental advantage over antivirus signatures.
 - **Masquerading:** Airlock checks the SHA-256 hash of file content, not the filename. Renaming malware doesn't help. The blocklist metarule engine's original filename field catches renamed trusted tools.
-- **LOLBIN proxy execution:** MSBuild, mshta, InstallUtil, regsvr32, rundll32, CMSTP, odbcconf - all controllable via predefined blocklist packages mapped to the LOLBAS project and MITRE ATT&CK techniques. DLLs loaded by these proxies must be trusted.
+- **LOLBIN proxy execution:** MSBuild, mshta, InstallUtil, CMSTP, odbcconf - all safely blocklistable via predefined blocklist packages mapped to the LOLBAS project and MITRE ATT&CK techniques. For LOLBINs that can't be safely blocklisted (regsvr32, rundll32), DLL control blocks any untrusted DLL they attempt to load.
 - **DLL hijacking:** Search order hijacking, sideloading, COR_PROFILER injection - the untrusted DLL is blocked at load regardless of how it got there.
 
-The 87 "No" techniques in defense evasion are predominantly in-memory operations (process injection family), identity-level techniques (valid accounts, token manipulation), and pre-OS boot (firmware, bootkit).
+The 90 "No" techniques in defense evasion are predominantly in-memory operations (process injection family), identity-level techniques (valid accounts, token manipulation), and pre-OS boot (firmware, bootkit).
 
-### Lateral Movement (71% covered)
+### Lateral Movement (58% covered)
 
 When an attacker moves laterally, they typically need to execute tools on the target. PsExec's service binary must be trusted on the target (and is covered by predefined blocklist rules). Tools copied via SMB admin shares must be trusted to execute. WinRM commands launching untrusted binaries are blocked. The pattern is consistent: the movement mechanism may succeed, but the execution on the remote host is controlled.
 
@@ -130,9 +134,9 @@ Every exfiltration technique operates at the network layer - transferring data o
 
 C2 is network protocol behavior - encoding, encryption, proxy chains, DNS tunneling. Airlock covers the 6 techniques that involve file execution: ingress tool transfer (downloaded tools must be trusted), remote access tools (must be allowlisted), and tunneling/proxy tools (must be trusted to run).
 
-### Credential Access (74% not covered)
+### Credential Access (76% not covered)
 
-Most credential access techniques are identity-plane operations: Kerberos ticket manipulation, brute force, credential store access, MFA interception. The 14 covered techniques are where specific tools can be blocked - credential dumping tools via default-deny, and built-in utilities like `reg.exe` and `rundll32.exe` via blocklist metarules.
+Most credential access techniques are identity-plane operations: Kerberos ticket manipulation, brute force, credential store access, MFA interception. The 13 covered techniques are where standalone attacker tools (mimikatz, procdump, SharpHound) are blocked by default-deny. Note: some credential techniques are achievable with core Windows utilities (`reg.exe` for SAM export, `rundll32.exe` for comsvcs.dll MiniDump) that cannot be practically blocklisted without breaking system operations. Credential Guard is the complementary control for LSASS protection.
 
 ### Process Injection (all sub-techniques not covered)
 
@@ -155,7 +159,36 @@ Result:    Standard users cannot launch PowerShell.
            Administrators retain access for legitimate operations.
 ```
 
-The same pattern applies to `cmd.exe`, `reg.exe`, `wmic.exe`, `netsh.exe`, `vssadmin.exe`, `certutil.exe`, `msbuild.exe`, and dozens of other utilities that attackers use for living-off-the-land techniques. Airlock ships predefined blocklist packages for Microsoft Recommended Block Rules, Microsoft Recommended Driver Block Rules, and LOLBAS-mapped packages that customers can import and deploy after an audit period.
+### What Can Be Safely Blocklisted
+
+Not all built-in Windows utilities can be practically blocklisted. The following classification is critical for honest coverage claims:
+
+**Safe to blocklist for non-admins** (standard users don't need these - blocking them won't break Windows):
+
+| Category | Tools |
+|:---------|:------|
+| LOLBINs (on Microsoft's own recommended block list) | mshta, cmstp, installutil, msbuild, regsvcs, regasm, odbcconf, mavinject |
+| Compilers | csc.exe, vbc.exe, jsc.exe |
+| Discovery/admin utilities | whoami, tasklist, systeminfo, netstat, ipconfig, nltest, dsquery, gpresult, pktmon |
+| Ransomware precursor tools | vssadmin, bcdedit, wbadmin |
+| Download/decode tools | certutil, bitsadmin |
+| Logging utilities | wevtutil, auditpol |
+| Other | shutdown, format, cipher, icacls, takeown, netsh, PowerShell, wmic |
+
+**Cannot be practically blocklisted** (too deeply integrated into Windows - blocking breaks system operations):
+
+| Tool | Why It Can't Be Blocked |
+|:-----|:-----------------------|
+| net.exe | Used by standard users for drive mapping, printer connections, and domain operations |
+| reg.exe / regedit.exe | Used by installers, Group Policy processing, and Windows Update |
+| sc.exe | Used by installers, SCCM, and Windows service management |
+| regsvr32.exe | Used by installers, Office, and Windows Update for COM registration |
+| rundll32.exe | Used by Control Panel, shell extensions, print dialogs, and system operations |
+| msiexec.exe | Used by ALL MSI-based installations including Windows patches |
+
+For techniques involving tools that can't be blocklisted, Airlock's defense is at the **payload level** - DLL control blocks what regsvr32/rundll32 try to load, script control blocks untrusted MSI files msiexec tries to install, and default-deny blocks any untrusted binary regardless of what spawned it.
+
+Airlock ships predefined blocklist packages for Microsoft Recommended Block Rules, Microsoft Recommended Driver Block Rules, and LOLBAS-mapped packages that customers can import and deploy after an audit period.
 
 ---
 
