@@ -430,13 +430,13 @@ DDE in Office launches processes. Any process/payload launched via DDE must be t
 **Limitations:** DDE data exchange between trusted apps not monitored.
 
 ### T1569 - System Services
-**Yes** 🟢 | default-deny + blocklist | Testable: yes
+**Yes** 🟢 | default-deny | Testable: yes
 
-Service binary must be trusted. Service creation may succeed but binary blocked at start. sc.exe restrictable.
+Service binary must be trusted. Service creation may succeed but untrusted binary blocked at start. sc.exe cannot be practically blocklisted but the binary execution is the control point.
 
-**Test:** sc create evilsvc binPath= C:\Temp\malware.exe -> OK, sc start -> blocked.
+**Test:** sc create evilsvc binPath= C:\Temp\malware.exe -> OK. sc start -> binary blocked.
 
-**Limitations:** Service creation not prevented.
+**Limitations:** Service creation not prevented. sc.exe cannot be practically blocklisted.
 
 ### T1569.002 - Service Execution
 **Yes** 🟢 | default-deny + blocklist (predefined) | Testable: yes
@@ -553,13 +553,9 @@ Additional email delegate permissions. No file execution.
 Device registration. MDM/identity plane.
 
 ### T1098.007 - Additional Local or Domain Groups
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-net.exe used for group manipulation. Restrictable via blocklist metarule for non-admins.
-
-**Test:** Metarule: original_filename 'net' AND user NOT admin -> blocks net group/localgroup manipulation.
-
-**Limitations:** PowerShell AD cmdlets still available if PS is trusted for the user.
+Adding users to groups is an identity operation. net.exe is used by standard users for drive mapping and other legitimate operations - blocklisting it causes operational issues. PowerShell AD cmdlets and direct LDAP/API calls can perform the same operation.
 
 ### T1112 - Modify Registry
 **No** ⚪ | none
@@ -578,22 +574,14 @@ External remote services (VPN/RDP/Citrix). Access mechanism. Post-access, Airloc
 **Limitations:** Access itself not prevented.
 
 ### T1136 - Create Account
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-net.exe (net user /add) restrictable via blocklist metarule for non-admins.
-
-**Test:** Blocklist net.exe for non-admins -> prevents net user /add.
-
-**Limitations:** PowerShell New-LocalUser/New-ADUser available if PS trusted.
+Account creation via net user /add. Identity operation. net.exe cannot be practically blocklisted. PowerShell New-LocalUser/New-ADUser available.
 
 ### T1136.001 - Local Account
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-net.exe used for account creation. Restrictable via blocklist metarule.
-
-**Test:** Metarule: original_filename 'net' AND user NOT admin -> blocks net user /add.
-
-**Limitations:** PowerShell New-LocalUser available if PS trusted.
+Local account creation via net user /add. Same as parent.
 
 ### T1136.002 - Domain Account
 **No** ⚪ | none
@@ -799,20 +787,20 @@ Bootkit. Below OS level.
 ### T1543 - Create or Modify System Process
 **Yes** 🟢 | default-deny | Testable: yes
 
-Service creation succeeds (sc create not prevented). Service binary blocked at start if untrusted. sc.exe can be blocklisted for non-admins.
+Service creation succeeds (sc create not prevented - sc.exe cannot be practically blocklisted). Service binary blocked at start if untrusted. This is the primary control - the attacker can register the service but the untrusted payload cannot execute.
 
-**Test:** sc create evilsvc binPath= C:\Temp\evil.exe -> creation OK. sc start evilsvc -> binary blocked.
+**Test:** sc create evilsvc binPath= C:\Temp\evil.exe -> creation OK. sc start evilsvc -> binary blocked (untrusted).
 
-**Limitations:** Service registration not prevented. Airlock controls the execution of the service binary, not the service configuration.
+**Limitations:** Service creation not prevented. sc.exe cannot be practically blocklisted. Airlock controls the execution of the service binary, not the service configuration.
 
 ### T1543.003 - Windows Service
-**Yes** 🟢 | default-deny + DLL-control + blocklist | Testable: yes
+**Yes** 🟢 | default-deny + DLL-control | Testable: yes
 
-Windows Service. Binary/DLL must be trusted. Service DLLs via svchost blocked. sc.exe blocklist-controllable.
+Windows Service binary/DLL must be trusted. Service DLLs loaded via svchost blocked by DLL control. sc.exe cannot be practically blocklisted but the service binary is the control point.
 
-**Test:** 1) sc create unsigned exe -> start blocked. 2) Malicious svchost service DLL -> blocked. 3) Blocklist sc.exe for non-admins.
+**Test:** 1) sc create with unsigned exe -> start blocked. 2) Malicious svchost service DLL -> blocked by DLL control.
 
-**Limitations:** Service creation not prevented.
+**Limitations:** Service creation not prevented. sc.exe cannot be practically blocklisted.
 
 ### T1546 - Event Triggered Execution
 **Yes** 🟢 | default-deny + script-control + DLL-control | Testable: yes
@@ -2146,13 +2134,9 @@ Clear command history. Data operation in trusted process.
 File deletion. del/rm via trusted shell. Data operation.
 
 ### T1070.005 - Network Share Connection Removal
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-net.exe used for 'net use /delete'. Restrictable via blocklist metarule.
-
-**Test:** Blocklist net.exe for non-admins.
-
-**Limitations:** Minor technique. PowerShell Remove-SmbMapping available if PS trusted.
+Network share connection removal via net use /delete. net.exe cannot be practically blocklisted. Minor technique.
 
 ### T1070.006 - Timestomp
 **No** ⚪ | none
@@ -2418,13 +2402,13 @@ Mshta. HTML application host. Can execute VBScript/JScript. Covered by script co
 **Limitations:** Key LOLBIN. Blocklist strongly recommended.
 
 ### T1218.007 - Msiexec
-**Yes** 🟢 | script-control + blocklist + DLL-control | Testable: yes
+**Yes** 🟢 | script-control + DLL-control | Testable: yes
 
-Msiexec. MSI execution. MSI files covered by script control. Msiexec can be restricted. DLLs loaded by MSI must be trusted.
+MSI files are covered by script control - untrusted MSI files blocked at execution. DLLs loaded by MSI must be trusted via DLL control. Note: msiexec.exe itself cannot be practically blocklisted as it is used by Windows for all MSI-based installations. Script control on the MSI file is the primary defense.
 
-**Test:** 1) Untrusted MSI -> blocked by script control. 2) MSI loading untrusted DLL -> blocked.
+**Test:** 1) Untrusted .msi file -> blocked by script control. 2) MSI loading untrusted DLL during install -> DLL blocked.
 
-**Limitations:** Trusted-signed MSIs from trusted publishers install.
+**Limitations:** msiexec.exe cannot be blocklisted. Trusted-signed MSIs from trusted publishers install normally.
 
 ### T1218.008 - Odbcconf
 **Yes** 🟢 | blocklist + DLL-control | Testable: yes
@@ -3068,11 +3052,11 @@ LSASS memory dump tools blocked (mimikatz untrusted, procdump blocklistable). co
 ### T1003.002 - Security Account Manager
 **Yes** 🟢 | default-deny + blocklist-metarule | Testable: yes
 
-SAM export via reg.exe: restrict reg.exe for non-admins via blocklist metarule. Standalone SAM tools blocked by default-deny.
+Standalone SAM dump tools blocked by default-deny. SAM export via reg.exe (reg save HKLM\SAM): reg.exe is a core Windows utility that cannot be practically blocklisted. Technique is achievable with built-in tools.
 
-**Test:** 1) Standalone tool -> blocked. 2) Metarule: original_filename 'reg' AND user NOT admin -> blocks reg save HKLM\SAM.
+**Test:** Standalone SAM dump tool -> blocked (untrusted). reg.exe save -> succeeds (trusted, cannot be blocklisted).
 
-**Limitations:** Admin-exempted users can still use reg.exe.
+**Limitations:** reg.exe cannot be practically blocklisted. Credential Guard and SAM encryption are complementary controls.
 
 ### T1003.003 - NTDS
 **Yes** 🟢 | default-deny + blocklist-metarule | Testable: yes
@@ -3086,9 +3070,11 @@ ntdsutil.exe: restrict via blocklist metarule for non-admins. Standalone tools b
 ### T1003.004 - LSA Secrets
 **Yes** 🟢 | default-deny + blocklist-metarule | Testable: yes
 
-LSA secrets dump tools blocked. reg.exe restrictable via metarule.
+Standalone LSA secrets dump tools blocked by default-deny. reg.exe for registry export cannot be practically blocklisted.
 
-**Test:** Same as T1003.002 - restrict reg.exe for non-admins.
+**Test:** Standalone dump tool -> blocked. reg.exe -> succeeds (cannot be blocklisted).
+
+**Limitations:** reg.exe cannot be practically blocklisted.
 
 ### T1003.005 - Cached Domain Credentials
 **No** ⚪ | none
@@ -3400,13 +3386,9 @@ Steal/forge auth certificates. Certificate operations.
 ## DISCOVERY (42 techniques - 21 covered)
 
 ### T1007 - System Service Discovery
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-sc.exe (sc query) restrictable via blocklist metarule for non-admins.
-
-**Test:** Blocklist sc.exe for non-admins.
-
-**Limitations:** PowerShell Get-Service available if PS trusted.
+System service discovery via sc.exe (sc query), Get-Service, or WMI. sc.exe is a core Windows utility used by installers and services - cannot be practically blocklisted. No common standalone attacker tool for this technique.
 
 ### T1010 - Application Window Discovery
 **No** ⚪ | none
@@ -3414,13 +3396,9 @@ sc.exe (sc query) restrictable via blocklist metarule for non-admins.
 Application window discovery. API-based enumeration.
 
 ### T1012 - Query Registry
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-reg.exe restrictable via blocklist metarule for non-admins.
-
-**Test:** Blocklist reg.exe for non-admins -> prevents reg query.
-
-**Limitations:** PowerShell Get-ItemProperty available if PS trusted.
+Registry querying via reg.exe (reg query) or PowerShell. reg.exe cannot be practically blocklisted. Data read operation.
 
 ### T1016 - System Network Configuration Discovery
 **Yes** 🟢 | blocklist-metarule | Testable: yes
@@ -3444,13 +3422,13 @@ netsh.exe (netsh wlan show) restrictable via blocklist metarule.
 **Test:** Blocklist netsh.exe for non-admins.
 
 ### T1018 - Remote System Discovery
-**Yes** 🟢 | default-deny + blocklist-metarule | Testable: yes
+**Yes** 🟢 | default-deny | Testable: yes
 
-net.exe (net view) restrictable via blocklist metarule. Standalone scanning tools blocked.
+Remote system discovery is achievable with built-in tools (net view, ping, nslookup, arp) that cannot be practically blocklisted. However, standalone enumeration tools commonly used by attackers (AdFind, nmap, masscan, BloodHound/SharpHound, Angry IP Scanner) are blocked by default-deny as untrusted executables.
 
-**Test:** 1) Standalone scanner -> blocked. 2) Blocklist net.exe for non-admins.
+**Test:** Drop AdFind.exe or SharpHound.exe on endpoint -> blocked (untrusted). nmap.exe -> blocked.
 
-**Limitations:** ping, nslookup too fundamental to blocklist. net.exe is the primary discovery tool to restrict.
+**Limitations:** Built-in tools (net view, ping, nslookup) cannot be practically blocklisted and achieve the same discovery.
 
 ### T1033 - System Owner/User Discovery
 **Yes** 🟢 | blocklist-metarule | Testable: yes
@@ -3498,27 +3476,29 @@ tasklist.exe restrictable via blocklist metarule for non-admins.
 **Limitations:** PowerShell Get-Process available if PS trusted.
 
 ### T1069 - Permission Groups Discovery
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**Yes** 🟢 | default-deny | Testable: yes
 
-net.exe (net group, net localgroup) restrictable via blocklist metarule.
+Permission group discovery is achievable with built-in tools (net group, net localgroup) that cannot be practically blocklisted. However, standalone enumeration tools (SharpHound, AdFind, BloodHound) are blocked by default-deny.
 
-**Test:** Blocklist net.exe for non-admins.
+**Test:** Drop SharpHound.exe or AdFind.exe -> blocked (untrusted).
 
-**Limitations:** PowerShell AD cmdlets available if PS trusted.
+**Limitations:** Built-in net.exe and PowerShell AD cmdlets achieve the same discovery.
 
 ### T1069.001 - Local Groups
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-net localgroup via net.exe. Restrictable.
-
-**Test:** Blocklist net.exe for non-admins.
+Local group discovery via net localgroup. Same net.exe impracticality. PowerShell Get-LocalGroupMember available.
 
 ### T1069.002 - Domain Groups
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**Yes** 🟢 | default-deny | Testable: yes
 
-net group /domain via net.exe. Restrictable.
+Domain group discovery is achievable with built-in tools (net group /domain) that cannot be practically blocklisted. However, standalone domain enumeration tools (SharpHound, AdFind) are blocked by default-deny.
 
-**Test:** Blocklist net.exe for non-admins.
+**Test:** SharpHound.exe / AdFind.exe -> blocked (untrusted).
+
+**Limitations:** Built-in net.exe and PowerShell Get-ADGroupMember achieve the same discovery.
+
+Domain group discovery via net group. Same net.exe impracticality. PowerShell Get-ADGroupMember available.
 
 ### T1082 - System Information Discovery
 **Yes** 🟢 | blocklist-metarule | Testable: yes
@@ -3535,27 +3515,29 @@ systeminfo.exe restrictable via blocklist metarule for non-admins.
 File and directory discovery. dir, Get-ChildItem. Trusted.
 
 ### T1087 - Account Discovery
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**Yes** 🟢 | default-deny | Testable: yes
 
-net.exe (net user) restrictable via blocklist metarule.
+Account discovery is achievable with built-in tools (net user) that cannot be practically blocklisted. However, standalone enumeration tools (SharpHound, AdFind, BloodHound) are blocked by default-deny.
 
-**Test:** Blocklist net.exe for non-admins.
+**Test:** SharpHound.exe / AdFind.exe -> blocked (untrusted).
 
-**Limitations:** PowerShell alternatives if PS trusted.
+**Limitations:** Built-in net.exe and PowerShell Get-LocalUser/Get-ADUser achieve the same discovery.
 
 ### T1087.001 - Local Account
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-net user via net.exe. Restrictable.
-
-**Test:** Blocklist net.exe for non-admins.
+Local account discovery via net user. Same net.exe impracticality.
 
 ### T1087.002 - Domain Account
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**Yes** 🟢 | default-deny | Testable: yes
 
-net user /domain via net.exe. Restrictable.
+Domain account discovery is achievable with built-in tools (net user /domain) that cannot be practically blocklisted. However, standalone domain enumeration tools (SharpHound, AdFind) are blocked by default-deny.
 
-**Test:** Blocklist net.exe for non-admins.
+**Test:** SharpHound.exe / AdFind.exe -> blocked (untrusted).
+
+**Limitations:** Built-in net.exe and PowerShell Get-ADUser achieve the same discovery.
+
+Domain account discovery via net user /domain. Same net.exe impracticality.
 
 ### T1087.003 - Email Account
 **No** ⚪ | none
@@ -3573,20 +3555,18 @@ Peripheral device discovery. Trusted tools/APIs.
 System time discovery. w32tm, time. Trusted.
 
 ### T1135 - Network Share Discovery
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**Yes** 🟢 | default-deny | Testable: yes
 
-net.exe (net share, net view) restrictable via blocklist metarule.
+Network share discovery is achievable with built-in tools (net share, net view) that cannot be practically blocklisted. However, standalone share enumeration tools (ShareFinder, SoftPerfect Network Scanner, PowerView as compiled exe) are blocked by default-deny.
 
-**Test:** Blocklist net.exe for non-admins.
+**Test:** ShareFinder.exe / SoftPerfect scanner -> blocked (untrusted).
 
-**Limitations:** PowerShell Get-SmbShare available if PS trusted.
+**Limitations:** Built-in net.exe and PowerShell Get-SmbShare achieve the same discovery.
 
 ### T1201 - Password Policy Discovery
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-net accounts via net.exe. Restrictable via blocklist metarule.
-
-**Test:** Blocklist net.exe for non-admins.
+Password policy discovery via net accounts. net.exe cannot be practically blocklisted.
 
 ### T1217 - Browser Information Discovery
 **No** ⚪ | none
@@ -4410,13 +4390,13 @@ Data encrypted for impact (ransomware). Ransomware executable must be trusted. T
 **Limitations:** Ransomware running inside already-trusted process (e.g., after injection) not caught.
 
 ### T1489 - Service Stop
-**Yes** 🟢 | agent-tamper-protection + blocklist-metarule | Testable: yes
+**Yes** 🟢 | agent-tamper-protection + default-deny | Testable: yes
 
-sc.exe and net.exe for service stopping: restrictable via blocklist metarule. Airlock agent specifically protected by kernel driver against stop attempts.
+Airlock agent specifically protected by kernel driver against stop attempts. For other services: sc.exe and net.exe are core Windows utilities that cannot be practically blocklisted. Standalone service manipulation tools blocked by default-deny.
 
-**Test:** 1) Attempt to stop Airlock agent -> kernel driver prevents. 2) Blocklist sc.exe for non-admins. 3) Blocklist net.exe for non-admins (blocks net stop).
+**Test:** 1) net stop airlock / sc stop airlock -> kernel driver prevents. 2) Standalone service manipulation tool -> blocked (untrusted).
 
-**Limitations:** Admin-exempted users can still stop services. Airlock agent protected regardless.
+**Limitations:** sc.exe and net.exe cannot be practically blocklisted. Other services can be stopped with built-in tools. Airlock agent itself is protected regardless.
 
 ### T1490 - Inhibit System Recovery
 **Yes** 🟢 | blocklist-metarule | Testable: yes
