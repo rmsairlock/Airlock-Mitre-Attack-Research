@@ -562,13 +562,11 @@ net.exe used for group manipulation. Restrictable via blocklist metarule for non
 **Limitations:** PowerShell AD cmdlets still available if PS is trusted for the user.
 
 ### T1112 - Modify Registry
-**Yes** 🟢 | blocklist-metarule | Testable: yes
+**No** ⚪ | none
 
-reg.exe and regedit.exe: restrict via blocklist metarule for non-admins. Many persistence techniques rely on registry modification - blocking reg.exe reduces attack surface.
+Registry modification is a data operation. Airlock doesn't monitor registry writes. reg.exe and regedit.exe are used by installers, Group Policy processing, and Windows Update - blocklisting them is impractical without breaking system operations. PowerShell, WMI, and direct registry APIs from any trusted process can modify the registry. Many persistence techniques USE registry for setup, but Airlock catches the PAYLOAD those registry entries point to, not the registry modification itself.
 
-**Test:** Metarule: original_filename 'reg' AND user NOT admin -> blocks reg.exe. Metarule: original_filename 'regedit' AND user NOT admin -> blocks regedit.
-
-**Limitations:** PowerShell Set-ItemProperty still available if PS trusted. Registry APIs from trusted processes not caught.
+**Limitations:** Registry monitoring is outside Airlock scope. Registry-based persistence is caught at payload execution time, not at registration time.
 
 ### T1133 - External Remote Services
 **No** ⚪ | none (post-access execution controlled) | Testable: partial
